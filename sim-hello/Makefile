@@ -36,7 +36,7 @@ CFLAGS += -Wall -Wextra
 
 # TODO - until "-mmcu=" option is added to the toolchain, we must use
 # a special linker script.
-CFLAGS += -Xlinker -Tprusim.x
+CFLAGS += -Xlinker -Tpruelf-sim.x
 
 # We cannot activate minrt when using stdio 
 #CFLAGS += -minrt
