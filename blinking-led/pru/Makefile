@@ -46,6 +46,9 @@ CFLAGS += -minrt
 OBJS0 := main0.o
 OBJS1 := main1.o
 
+LDFLAGS0 :=
+LDFLAGS1 := -nostdlib -nodefaultlibs -nostartfiles
+
 # Where to output compiled objects
 OUT := out
 
@@ -80,10 +83,10 @@ $(OUT):
 	mkdir $(OUT)
 
 $(OUT)/pru-core0.elf: $(OBJS0) | $(OUT)
-	$(CROSS_COMPILE)gcc $(CFLAGS) $^ $(LDFLAGS) -o $@
+	$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS0) $^ $(LDFLAGS) -o $@
 
 $(OUT)/pru-core1.elf: $(OBJS1) | $(OUT)
-	$(CROSS_COMPILE)gcc $(CFLAGS) $^ $(LDFLAGS) -o $@
+	$(CROSS_COMPILE)gcc $(CFLAGS) $(LDFLAGS1) $^ $(LDFLAGS) -o $@
 
 clean:
 	$(RM) -fr pru-core0.elf pru-core1.elf $(OBJS0) $(OBJS1) $(OUT)

@@ -5,7 +5,7 @@ The pru-gcc toolchain source and build instructions are located at https://githu
 The following simple examples are available.
 
 ## blinking-led
-The "hello world" example of the embedded world. Both PRU cores of a Beaglebone Black are started to toggle GPIOs.
+The "hello world" example of the embedded world. Both PRU cores of a Beaglebone Black are started to toggle GPIOs. PRU0 core is programmed in C, while the firmware for PRU1 core is written in assembler.
 
 ## md5-check
 Calculate MD5 checksum for a known data chunk on both the ARM loader and one PRU core. Then ARM loader reads and compares the two checksums.
