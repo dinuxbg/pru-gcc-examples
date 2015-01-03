@@ -32,13 +32,13 @@ main:
 	ldi	r1, 0xffff
 
 main_loop:
-	ldi	r14.w2, %hi(CPU_HZ / 2)
-	ldi	r14.w0, %lo(CPU_HZ / 2)
+	ldi	r14.w2, %hi(CPU_HZ / 4)
+	ldi	r14.w0, %lo(CPU_HZ / 4)
 	call	delay_n2_cycles
 	/* DING */
 	mov	r30, r0
-	ldi	r14.w2, %hi(CPU_HZ / 2)
-	ldi	r14.w0, %lo(CPU_HZ / 2)
+	ldi	r14.w2, %hi(CPU_HZ / 4)
+	ldi	r14.w0, %lo(CPU_HZ / 4)
 	call	delay_n2_cycles
 	/* DONG */
 	mov	r30, r1
@@ -46,5 +46,5 @@ main_loop:
 
 delay_n2_cycles:
 	sub	r14, r14, 1
-	qbeq	delay_n2_cycles, r14, 0
+	qbne	delay_n2_cycles, r14, 0
 	ret
