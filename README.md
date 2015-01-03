@@ -13,4 +13,5 @@ Calculate MD5 checksum for a known data chunk on both the ARM loader and one PRU
 ## sim-hello
 Simulate your PRU executable on your PC. Note that pru-run is an ISA only simulator. Digital I/O is not simulated. Neither is OCP access.
 
-
+## sim-hello++
+Same simulator project as sim-hello, but written in C++ instead of C.
