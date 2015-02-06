@@ -26,7 +26,7 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-#include "pru.h"
+#include <pru/io.h>
 
 #include "md5.h"
 
@@ -59,7 +59,7 @@ int main(void)
 	MD5_Final(md5res, &md5ctx);
 
 	for (c = 0; ; c++) {
-		set_r30(c & 1 ? 0xffff : 0x0000);
+		write_r30(c & 1 ? 0xffff : 0x0000);
 		delay_us (1000 * 1000);
 	}
 
