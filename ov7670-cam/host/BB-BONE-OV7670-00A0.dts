@@ -1,0 +1,73 @@
+/*
+* Copyright (C) 2013 Matt Ranostay <mranostay@gmail.com>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License version 2 as
+* published by the Free Software Foundation.
+*/
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+	/* identification */
+	part-number = "BB-BONE-OV7670";
+	version = "00A0";
+
+	/* state the resources this cape uses */
+	exclusive-use =
+		/* the pin header uses */
+		"P8.45",	/* pru1: pr1_pru1_pru_r30_0 */
+		"P8.46",	/* pru1: pr1_pru1_pru_r30_1 */
+		"P8.43",	/* pru1: pr1_pru1_pru_r31_2 */
+		"P8.44",	/* pru1: pr1_pru1_pru_r31_3 */
+		"P8.41",	/* pru1: pr1_pru1_pru_r31_4 */
+		"P8.42",	/* pru1: pr1_pru1_pru_r31_5 */
+		"P8.39",	/* pru1: pr1_pru1_pru_r31_6 */
+		"P8.40",	/* pru1: pr1_pru1_pru_r31_7 */
+		"P8.27",	/* pru1: pr1_pru1_pru_r31_8 */
+		"P8.29",	/* pru1: pr1_pru1_pru_r31_9 */
+		"P8.28",	/* pru1: pr1_pru1_pru_r31_10 */
+		"P8.30",	/* pru1: pr1_pru1_pru_r31_11 */
+		"P9.26",	/* pru1: pr1_pru1_pru_r31_16 */
+		"P8.7",		/* gpio2_2 */
+		/* the hardware IP uses */
+		"gpio2_2",
+		"pru0";
+
+	fragment@0 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+
+			pru_pru_pins: pinmux_pru_pru_pins {
+				pinctrl-single,pins = <
+					0x0a0 0x5	/* lcd_data0.pr1_pru1_pru_r30_0, PRU OUTPUT, */
+					0x0a4 0x5	/* lcd_data1.pr1_pru1_pru_r30_1, PRU OUTPUT, XCLK */
+					0x0a8 0x26	/* lcd_data2.pr1_pru1_pru_r31_2, PRU INPUT, D0 */
+					0x0ac 0x26	/* lcd_data2.pr1_pru1_pru_r31_3, PRU INPUT, D1 */
+					0x0b0 0x26	/* lcd_data3.pr1_pru1_pru_r31_4, PRU INPUT, D2 */
+					0x0b4 0x26	/* lcd_data4.pr1_pru1_pru_r31_5, PRU INPUT, D3 */
+					0x0b8 0x26	/* lcd_data5.pr1_pru1_pru_r31_6, PRU INPUT, D4 */
+					0x0bc 0x26	/* lcd_data6.pr1_pru1_pru_r31_7, PRU INPUT, D5 */
+					0x0e0 0x26	/* lcd_vsync.pr1_pru1_pru_r31_8, PRU INPUT, D6 */
+					0x0e4 0x26	/* lcd_hsync.pr1_pru1_pru_r31_9, PRU INPUT, D7 */
+					0x0e8 0x26	/* lcd_pclk.pr1_pru1_pru_r31_10, PRU INPUT, HREF */
+					0x0ec 0x26	/* lcd_ac_bias_en.pr1_pru1_pru_r31_11, PRU INPUT, VSYNC */
+					0x180 0x26	/* uart1_rxd.pr1_pru1_pru_r31_16, PRU INPUT, PCLK */
+					0x090 0x7	/* gpmc_advn_ale.gpio2_2, CAM_RESET */
+				>;
+			};
+		};
+	};
+
+	fragment@2 {
+		target = <&pruss>;
+		__overlay__ {
+			status = "okay";
+
+			pinctrl-names = "default";
+			pinctrl-0 = <&pru_pru_pins>;
+		};
+	};
+};
