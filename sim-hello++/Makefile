@@ -34,9 +34,7 @@ CROSS_COMPILE ?= pru-
 CXXFLAGS += -g -Os
 CXXFLAGS += -Wall -Wextra
 
-# TODO - until "-mmcu=" option is added to the toolchain, we must use
-# a special linker script.
-CXXFLAGS += -Xlinker -Tpruelf-sim.x
+CXXFLAGS += -mmcu=sim
 
 CXXFLAGS += -fno-rtti
 

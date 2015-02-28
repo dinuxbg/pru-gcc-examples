@@ -34,9 +34,7 @@ CROSS_COMPILE ?= pru-
 CFLAGS += -g -Os
 CFLAGS += -Wall -Wextra
 
-# TODO - until "-mmcu=" option is added to the toolchain, we must use
-# a special linker script.
-CFLAGS += -Xlinker -Tpruelf-sim.x
+CFLAGS += -mmcu=sim
 
 # We cannot activate minrt when using stdio 
 #CFLAGS += -minrt

@@ -33,6 +33,7 @@
 CROSS_COMPILE ?= pru-
 CXXFLAGS += -g -Os
 CXXFLAGS += -Wall -Wextra
+CXXFLAGS += -mmcu=am335x.pru0
 
 CXXFLAGS += -fno-rtti
 
