@@ -44,7 +44,7 @@ int main(void)
 	 *
 	 *   frames per second ---------------------------------.
 	 *   two bytes per pixel ---------------------------.   |
-	 *   PCK = 2 * XCK   ---------------------------.   |   |
+	 *   PCK = XCK / 2   ---------------------------.   |   |
 	 *   vertical resolution ---.                   |   |   |
 	 *   xres  --.              |                   |   |   |
 	 *           |              |                   |   |   |  */

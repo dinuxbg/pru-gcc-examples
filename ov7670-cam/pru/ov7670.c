@@ -100,23 +100,6 @@ unsigned long ov7670_init(unsigned long xclk_rate_hz)
  * Wait for rising edge of pixel clock and read parallel output, including
  * both raw data and control lines.
  */
-static inline uint32_t read_clocked_pbyte(void)
-{
-	uint32_t r;
-
-	/* skip through low HREF cycles */
-	do {
-		/* wait for HIGH capture clk (r31.b16) */
-		while (!(read_r31() & (1u << PCLK_BIT)));
-	} while (~(r = read_r31()) & (1u << HREF_BIT));
-
-	return r >> DATA_BIT;
-}
-
-/*
- * Wait for rising edge of pixel clock and read parallel output, including
- * both raw data and control lines.
- */
 static inline uint32_t read_clocked_rawbyte(void)
 {
 	/* wait for LOW PCLK */
