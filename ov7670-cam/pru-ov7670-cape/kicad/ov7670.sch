@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 5 5
 Title ""
-Date "17 mar 2015"
+Date "29 mar 2015"
 Rev ""
 Comp ""
 Comment1 ""
@@ -70,7 +70,7 @@ F 3 "" H 8500 4550 60  0000 C CNN
 $EndComp
 Text HLabel 10300 3150 2    60   Input ~ 0
 CAM1_SIO_C
-Text HLabel 2400 4500 0    60   Output ~ 0
+Text HLabel 2400 4400 0    60   Output ~ 0
 CAM1_VSYNC
 Text HLabel 2400 4600 0    60   Output ~ 0
 CAM1_D7
@@ -82,7 +82,7 @@ Text HLabel 2400 4900 0    60   Output ~ 0
 CAM1_D1
 Text HLabel 2400 5000 0    60   Input ~ 0
 CAM1_RESET
-Text HLabel 2400 4400 0    60   Output ~ 0
+Text HLabel 2400 4500 0    60   Output ~ 0
 CAM1_PCLK
 Text HLabel 10300 3250 2    60   BiDi ~ 0
 CAM1_SIO_D
@@ -137,9 +137,9 @@ Text HLabel 7400 4700 0    60   Output ~ 0
 CAM2_D5
 Text HLabel 7400 4600 0    60   Output ~ 0
 CAM2_D7
-Text HLabel 7400 4500 0    60   Output ~ 0
-CAM2_VSYNC
 Text HLabel 7400 4400 0    60   Output ~ 0
+CAM2_VSYNC
+Text HLabel 7400 4500 0    60   Output ~ 0
 CAM2_PCLK
 Text HLabel 10300 3350 2    60   Input ~ 0
 CAM2_SIO_C
@@ -181,7 +181,7 @@ L R R6
 U 1 1 54E19A1A
 P 3000 5450
 F 0 "R6" V 3080 5450 40  0000 C CNN
-F 1 "1k5" V 3007 5451 40  0000 C CNN
+F 1 "N/A" V 3007 5451 40  0000 C CNN
 F 2 "~" V 2930 5450 30  0000 C CNN
 F 3 "~" H 3000 5450 30  0000 C CNN
 	1    3000 5450
@@ -192,7 +192,7 @@ L R R8
 U 1 1 54E19B83
 P 8050 5450
 F 0 "R8" V 8130 5450 40  0000 C CNN
-F 1 "1k5" V 8057 5451 40  0000 C CNN
+F 1 "N/A" V 8057 5451 40  0000 C CNN
 F 2 "~" V 7980 5450 30  0000 C CNN
 F 3 "~" H 8050 5450 30  0000 C CNN
 	1    8050 5450
@@ -225,7 +225,7 @@ L R R10
 U 1 1 54E1A074
 P 2700 5000
 F 0 "R10" V 2780 5000 40  0000 C CNN
-F 1 "N/A" V 2707 5001 40  0000 C CNN
+F 1 "0" V 2707 5001 40  0000 C CNN
 F 2 "~" V 2630 5000 30  0000 C CNN
 F 3 "~" H 2700 5000 30  0000 C CNN
 	1    2700 5000
@@ -247,7 +247,7 @@ L R R12
 U 1 1 54E1A63F
 P 7750 5000
 F 0 "R12" V 7830 5000 40  0000 C CNN
-F 1 "N/A" V 7757 5001 40  0000 C CNN
+F 1 "0" V 7757 5001 40  0000 C CNN
 F 2 "~" V 7680 5000 30  0000 C CNN
 F 3 "~" H 7750 5000 30  0000 C CNN
 	1    7750 5000
@@ -441,10 +441,6 @@ F 3 "~" H 1300 2500 30  0000 C CNN
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	2400 4400 3050 4400
-Wire Wire Line
-	2400 4500 3050 4500
-Wire Wire Line
 	2400 4600 3050 4600
 Wire Wire Line
 	2400 4700 3050 4700
@@ -468,10 +464,6 @@ Wire Wire Line
 	7600 4200 8100 4200
 Wire Wire Line
 	7600 4200 7600 4100
-Wire Wire Line
-	7400 4400 8100 4400
-Wire Wire Line
-	7400 4500 8100 4500
 Wire Wire Line
 	7400 4600 8100 4600
 Wire Wire Line
@@ -653,4 +645,12 @@ Wire Wire Line
 	1300 2150 1700 2150
 Text Notes 1600 2550 0    60   ~ 0
 Note: I2C2 pull-ups are already present on sheet P9
+Wire Wire Line
+	8100 4400 7400 4400
+Wire Wire Line
+	7400 4500 8100 4500
+Wire Wire Line
+	3050 4400 2400 4400
+Wire Wire Line
+	2400 4500 3050 4500
 $EndSCHEMATC

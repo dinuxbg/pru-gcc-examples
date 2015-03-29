@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 3 5
 Title "PRU-OV7670-CAPE - Proto board for BeagleBone"
-Date "17 mar 2015"
+Date "29 mar 2015"
 Rev "0.3"
 Comp "Jacek Radzikowski <jacek.radzikowski@gmail.com>"
 Comment1 "https://github.com/piranha32/FlyingBone"
