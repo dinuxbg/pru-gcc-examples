@@ -40,7 +40,7 @@ PRU1 on a Beaglebone White fetches RGB565 stream from an OV7670 camera module. T
 
 Currently PRU0 sits idle, but in the future it could itself fetch from a second camera, or act as a buffer (akin to BeagleLogic) in order to achieve higher FPS.
 
-For information how to connect the OV7670 camera module to BeagleBone White, please see the included KiCad schematic. A cape PCB project is also included, but it has not yet been verified!
+For information how to connect the OV7670 camera module to BeagleBone White, please see the included KiCad schematic. A cape PCB project is also included.
 
 How to run:
 
@@ -52,6 +52,11 @@ How to run:
 Acknowledgements:
  * I2C initialization sequence from the OV7670 Linux kernel driver.
  * Cape schematics and PCB are slightly modified copies of FlyingBone ( https://github.com/piranha32/FlyingBone ).
+
+Cape errata:
+ * Female long-pin headers are needed for the 2x23 connectors to BBW. Drills are 0.8mm, so the common male pin headers cannot fit.
+ * There is no voltage buffer between BBW (3.3V I/O) and OV7670 (2.7V I/O). In theory this could damage the camera, but nevertheless it works for me (tm).
+ * Some component markings are not visible on the final PCB because silk screen overlaps solder pads.
 
 ## sim-hello
 Simulate your PRU executable on your PC. Note that pru-run is an ISA only simulator. Digital I/O is not simulated. Neither is OCP access.

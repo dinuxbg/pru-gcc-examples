@@ -1,4 +1,7 @@
 
-This is work in progress! PCB has still not been verified!
+Directory structure:
+ * gerber: Gerber files for production.
+ * kicad: Kicad project
+ * lib: Kicad libraries
+ * releases: PDF schematics and ZIP files ready for OSHPark production.
 
-Schematic has been verified on a breadboard, though.
