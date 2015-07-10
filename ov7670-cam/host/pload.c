@@ -250,18 +250,21 @@ static void dump_stats(struct prufw *fw)
 {
 	uint32_t val;
 	if (!pru_read_var(fw, "_num_frames", &val))
-		printf("   num_frames=%u\n", val);
+		printf("PRU%d:   num_frames=%u\n", fw->coreid, val);
 }
 
 int main (int argc, char *argv[])
 {
-	void *vmem;
+	void *ddram_shared_mem;
+	uint8_t *vmem0;
+	uint8_t *vmem1;
 	tpruss_intc_initdata pruss_intc_initdata = PRUSS_INTC_INITDATA;
 	struct prufw fw[2];
 	int ret;
 
-	if (argc != 4)
-		errx(EXIT_FAILURE, "Usage: %s <PRU0.elf> <PRU1.elf> <image>\n",
+	if (argc != 5)
+		errx(EXIT_FAILURE, "Usage: %s <PRU0.elf> <PRU1.elf> "
+				"<cam0_image> <cam1_image>\n",
 				argv[0]);
 
 	printf("Initializing the PRUs...\n");
@@ -282,11 +285,18 @@ int main (int argc, char *argv[])
 	if (ret)
 		errx(EXIT_FAILURE, "could not load \"%s\".\n", argv[2]);
 
-	/* Provide video memory address to PRU core */
-	prussdrv_map_extmem(&vmem);
-	ret = pru_write_videomem_addr(&fw[1], prussdrv_get_phys_addr(vmem));
+	/* Provide video memory address to PRU cores. Just split the
+	 * allocated 2MB DDRAM chunk into two. */
+	prussdrv_map_extmem(&ddram_shared_mem);
+	vmem0 = ddram_shared_mem;
+	vmem1 = vmem0 + 640 * 480 * 2;
+
+	ret = pru_write_videomem_addr(&fw[0], prussdrv_get_phys_addr(vmem0));
 	if (ret)
-		errx(EXIT_FAILURE, "could not init VMEM.\n");
+		errx(EXIT_FAILURE, "could not init VMEM0.\n");
+	ret = pru_write_videomem_addr(&fw[1], prussdrv_get_phys_addr(vmem1));
+	if (ret)
+		errx(EXIT_FAILURE, "could not init VMEM1.\n");
 
 	printf("Starting ...\n");
 	prussdrv_pru_enable(0);
@@ -294,12 +304,42 @@ int main (int argc, char *argv[])
 
 	/* let XCLK to stabilize - this is needed for I2C to function */
 	usleep(100 * 1000);
-	if (ov7670_i2c_setup(1, 0x21)) {
-		printf("ERROR: Could not initialize OV7670 via I2C\n");
+
+	/* CAM0 connected ro I2C1, reset by GPIO2_4.
+	 * Note: Due to dynamic I2C activation, it ends up as /dev/i2c-2 */
+	if (ov7670_i2c_setup(2, 0x21, (2 * 32) + 4)) {
+		printf("ERROR: Could not initialize OV7670 CAM0 via I2C\n");
+		/* do not exit on errors - the other cam may still capture */
 	}
 
+	/* CAM1 connected to I2C2, reset by GPIO2_2 */
+	if (ov7670_i2c_setup(1, 0x21, (2 * 32) + 2)) {
+		printf("ERROR: Could not initialize OV7670 CAM1 via I2C\n");
+		/* do not exit on errors - the other cam may still capture */
+	}
+
+#if 1
 	/* let PRU run for a while */
 	usleep(1 * 1000 * 1000);
+#else
+	{
+		/* Debug code to aid manual focus when we lack live preview */
+		const int vmem_size = 640 * 480 * 2;
+		int i;
+		void *mem = malloc(vmem_size);
+		for (i = 0; i < 100; i++) {
+			int sharpness0, sharpness1;
+			memcpy(mem, vmem0, vmem_size);
+			sharpness0 = image_sharpness(mem, 640, 480, 640 * 2);
+			memcpy(mem, vmem1, vmem_size);
+			sharpness1 = image_sharpness(mem, 640, 480, 640 * 2);
+			printf("Sharpness: PRU0=% 8d, PRU1=% 8d\r",
+					sharpness0, sharpness1);
+			fflush(stdout);
+		}
+		printf("                                                \n");
+	}
+#endif
 
 	/* disable PRU and close memory mapping */
 	printf("Stopping PRU... \n");
@@ -307,15 +347,17 @@ int main (int argc, char *argv[])
 	prussdrv_pru_disable(0);
 	prussdrv_pru_disable(1);
 
+	dump_stats(&fw[0]);
 	dump_stats(&fw[1]);
 
-	/* save image from the shared video memory into a PPM file */
-	if (1)
-		ret = save_image_rgb(vmem, 640, 480, 640 * 2, argv[3]);
-	else
-		ret = save_image_yuv(vmem, 640, 480, 640 * 2, argv[3]);
+	/* save images from the shared video memory into a PPM file */
+	ret = save_image_rgb(vmem0, 640, 480, 640 * 2, argv[3]);
 	if (ret)
 		errx(EXIT_FAILURE, "could not save \"%s\".\n", argv[3]);
+
+	ret = save_image_rgb(vmem1, 640, 480, 640 * 2, argv[4]);
+	if (ret)
+		errx(EXIT_FAILURE, "could not save \"%s\".\n", argv[4]);
 
 	pru_close_elf(&fw[0]);
 	pru_close_elf(&fw[1]);

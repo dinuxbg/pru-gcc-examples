@@ -26,33 +26,35 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
+#include <stdlib.h>
+#include <string.h>
 #include <pru/io.h>
 
-/* A very rought estimate. TODO - do it properly! */
-static void delay_cycles(unsigned int n)
-{
-	unsigned int i;
+#include "ov7670.h"
 
-	for (i = 0; i < n/2; i++)
-		asm volatile ("nop" : : );
-}
-
-static void delay_us(unsigned int us)
-{
-	/* assume cpu frequency is 200MHz */
-	delay_cycles (us * (1000 / 5));
-}
-
-const unsigned int period_us = 250 * 1000;
+/* Filled-in by the host with video memory pointer. */
+void *video_memory;
 
 int main(void)
 {
-	unsigned int c;
+	if (!video_memory)
+		return EXIT_FAILURE;
 
-	for (c = 0; ; c++) {
-		write_r30(c & 1 ? 0xffff : 0x0000);
-		delay_us (period_us);
+	/* Hardcode VGA for the time being.
+	 *
+	 *   frames per second ---------------------------------.
+	 *   two bytes per pixel ---------------------------.   |
+	 *   PCK = XCK / 2   ---------------------------.   |   |
+	 *   vertical resolution ---.                   |   |   |
+	 *   xres  --.              |                   |   |   |
+	 *           |              |                   |   |   |  */
+	ov7670_init((640 + 144) * (480 + 3 + 17 + 10) * 2 * 2 * 15);
+
+	memset(video_memory, 0x00, 640 * 480 * 2);
+
+	for (;;) {
+		ov7670_capture_frame(video_memory, 640, 480, 640 * 2);
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }

@@ -18,6 +18,18 @@
 	/* state the resources this cape uses */
 	exclusive-use =
 		/* the pin header uses */
+		"P9.31",	/* pru1: pr1_pru0_pru_r31_0 */
+		"P9.29",	/* pru1: pr1_pru0_pru_r31_1 */
+		"P9.30",	/* pru1: pr1_pru0_pru_r31_2 */
+		"P9.28",	/* pru1: pr1_pru0_pru_r31_3 */
+		"P9.42",	/* pru1: pr1_pru0_pru_r31_4 */
+		"P9.27",	/* pru1: pr1_pru0_pru_r31_5 */
+		"P9.41",	/* pru1: pr1_pru0_pru_r31_6 */
+		"P9.25",	/* pru1: pr1_pru0_pru_r31_7 */
+		"P8.16",	/* pru1: pr1_pru0_pru_r31_14 */
+		"P8.15",	/* pru1: pr1_pru0_pru_r31_15 */
+		"P9.24",	/* pru1: pr1_pru0_pru_r31_16 */
+		"P8.10",	/* gpio2_4 */
 		"P8.45",	/* pru1: pr1_pru1_pru_r30_0 */
 		"P8.46",	/* pru1: pr1_pru1_pru_r30_1 */
 		"P8.43",	/* pru1: pr1_pru1_pru_r31_2 */
@@ -34,7 +46,9 @@
 		"P8.7",		/* gpio2_2 */
 		/* the hardware IP uses */
 		"gpio2_2",
-		"pru0";
+		"gpio2_4",
+		"pru0",
+		"pru1";
 
 	fragment@0 {
 		target = <&am33xx_pinmux>;
@@ -42,6 +56,20 @@
 
 			pru_pru_pins: pinmux_pru_pru_pins {
 				pinctrl-single,pins = <
+					/* CAM0 (takes the same XCLK as CAM1 from PRU1) */
+					0x190 0x26	/* mcasp0_aclkx.pr1_pru0_pru_r31_0, PRU INPUT, D0 */
+					0x194 0x26	/* mcasp0_fsx.pr1_pru0_pru_r31_1, PRU INPUT, D1 */
+					0x198 0x26	/* mcasp0_axr0.pr1_pru0_pru_r31_2, PRU INPUT, D2 */
+					0x19c 0x26	/* mcasp0_ahclkr.pr1_pru0_pru_r31_3, PRU INPUT, D3 */
+					0x1a0 0x26	/* mcasp0_aclkr.pr1_pru0_pru_r31_4, PRU INPUT, D4 */
+					0x1a4 0x26	/* mcasp0_fsr.pr1_pru0_pru_r31_5, PRU INPUT, D5 */
+					0x1a8 0x26	/* mcasp0_axr1.pr1_pru0_pru_r31_6, PRU INPUT, D6 */
+					0x1ac 0x26	/* mcasp0_ahclkx.pr1_pru0_pru_r31_7, PRU INPUT, D7 */
+					0x038 0x26	/* lcd_data17.pr1_pru0_pru_r31_14, PRU INPUT, HREF */
+					0x03c 0x26	/* lcd_data16.pr1_pru0_pru_r31_15, PRU INPUT, VSYNC */
+					0x184 0x26	/* uart1_txd.pr1_pru0_pru_r31_16, PRU INPUT, PCLK */
+					0x098 0x7	/* gpmc_wen.gpio2_4, CAM_RESET */
+					/* CAM1 */
 					0x0a0 0x5	/* lcd_data0.pr1_pru1_pru_r30_0, PRU OUTPUT, */
 					0x0a4 0x5	/* lcd_data1.pr1_pru1_pru_r30_1, PRU OUTPUT, XCLK */
 					0x0a8 0x26	/* lcd_data2.pr1_pru1_pru_r31_2, PRU INPUT, D0 */
@@ -56,6 +84,8 @@
 					0x0ec 0x26	/* lcd_ac_bias_en.pr1_pru1_pru_r31_11, PRU INPUT, VSYNC */
 					0x180 0x26	/* uart1_rxd.pr1_pru1_pru_r31_16, PRU INPUT, PCLK */
 					0x090 0x7	/* gpmc_advn_ale.gpio2_2, CAM_RESET */
+					/* Miscellaneous */
+					0x1b4 0x0	/* xdma_event_intr1 - force input on CLKOUT2 to allow CAM0.D6 to drive it */
 				>;
 			};
 		};

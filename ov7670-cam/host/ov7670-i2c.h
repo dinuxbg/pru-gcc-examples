@@ -29,7 +29,8 @@
 #ifndef __OV7670_I2C_H__
 #define __OV7670_I2C_H__
 
-extern int ov7670_i2c_setup(const int busid, const int i2c_addr);
+extern int ov7670_i2c_setup(const int busid, const int i2c_addr,
+		const int reset_gpio);
 
 #endif	/* __OV7670_I2C_H__ */
 

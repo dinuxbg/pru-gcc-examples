@@ -35,4 +35,8 @@ int save_image_rgb(void *image, unsigned int xres, unsigned int yres,
 int save_image_yuv(void *image, unsigned int xres, unsigned int yres,
 		unsigned int stride, const char *filename);
 
+/* Estimate image sharpness in arbitrary units. */
+int image_sharpness(void *image, unsigned int xres, unsigned int yres,
+		unsigned int stride);
+
 #endif	/* __IMAGE_H__ */

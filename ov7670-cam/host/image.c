@@ -115,3 +115,51 @@ int save_image_yuv(void *image, unsigned int xres, unsigned int yres,
 	return 0;
 }
 
+static int rgb2y(uint8_t *pixel)
+{
+	unsigned int red = (pixel[0] >> 3) & 0x1f;
+	unsigned int green = ((pixel[0] & 0x7) << 3) | ((pixel[1] >> 5) & 0x7);
+	unsigned int blue = pixel[1] & 0x1f;
+
+	/* From Wikipedia: Y= 0.299*R + 0.587*G + 0.144*B */
+	return (299 * red + 587 * green + 144 * blue) / 1000;
+}
+
+static int average_area_y(uint8_t *start_pixel, const unsigned int window,
+		const unsigned int stride)
+{
+	unsigned int x, y;
+	uint8_t *p, *line;
+	int avg = 0;
+
+	for (y = 0, line = start_pixel; y < window; y++, line += stride) {
+		for (x = 0, p = line; x < window; x++, p += 2)
+			avg += rgb2y(p);
+	}
+
+	return avg / (window * window);
+}
+
+int image_sharpness(void *image, unsigned int xres, unsigned int yres,
+		unsigned int stride)
+{
+	const int factor = 16;
+	const unsigned int window = 32;
+	uint8_t *p, *line;
+	unsigned int x, y;
+
+	/* Integer overflow is not possible = we're adding 640*480=307200
+	 * 8bit Y values, which tops way below 32bit range */
+	int32_t sharpness = 0;
+
+	for (y = 0, line = image; y < yres - window; y += factor, line += stride * factor) {
+		for (x = 0, p = line; x < xres - window; x += factor, p += 2 * factor) {
+			int avg = average_area_y(p, window, stride);
+			int pixel = rgb2y(p);
+			sharpness += abs(avg - pixel);
+		}
+	}
+
+	return sharpness * 100 / (xres * yres / factor / factor);
+}
+

@@ -29,62 +29,53 @@
 # Very simple makefile to cross-compile for PRU
 
 
-# Use the same build options for each core.
+# Common flags
 CROSS_COMPILE ?= pru-
 CFLAGS += -g -Os
 CFLAGS += -Wall -Wextra
-
-CFLAGS += -mmcu=am335x.pru1
 
 # Define this to squeeze code size by removing atexit, exit, constructors
 # and destructors from CRT.
 CFLAGS += -minrt
 
-# List of object files to compile for each PRU core.
-OBJS0 := main0.o
-OBJS1 := main1.o ov7670.o
+# Per-PRU core flags. The -mmcu option will select the correct linker
+# script and will predefine mcu-specific macros.
+CFLAGS0 += -mmcu=am335x.pru0
+CFLAGS1 += -mmcu=am335x.pru1
+
+# List of source files to compile for each PRU core.
+SRC0 := main0.c ov7670.c
+SRC1 := main1.c ov7670.c
+
+# GCC's -MMD does not yield the needed C dependencies when compiling all
+# C source files at once. So manually list headers here.
+HEADERS := $(wildcard *.h)
 
 # Where to output compiled objects
 OUT := out
 
+# Final ELF image file names
+ELF0 := $(OUT)/pru-core0.elf
+ELF1 := $(OUT)/pru-core1.elf
+
 # ============================ DO NOT TOUCH BELOW ============================
-all: $(OUT)/pru-core0.elf $(OUT)/pru-core1.elf
+all: $(ELF0) $(ELF1)
 	@echo Success: $^
-
-# OBJS0 := $(addprefix $(OUT)/, $(patsubst %.c,%.o,$(SRC0)))
-# OBJS1 := $(addprefix $(OUT)/, $(patsubst %.c,%.o,$(SRC1)))
-OBJS0 := $(addprefix $(OUT)/, $(OBJS0))
-OBJS1 := $(addprefix $(OUT)/, $(OBJS1))
-
-DEPS := $(OBJS0:.o=.d) $(OBJS1:.o=.d)
--include $(DEPS)
-
-$(OUT)/%.o : %.c
-	$(CROSS_COMPILE)gcc $(CFLAGS) $< -c -o $@ -MMD
-
-$(OUT)/%.o : %.S
-	$(CROSS_COMPILE)gcc $(CFLAGS) $< -c -o $@ -MMD
-
-$(OUT)/%.s : %.c
-	$(CROSS_COMPILE)gcc $(CFLAGS) $< -S -o $@
 
 %.s : %.elf
 	$(CROSS_COMPILE)objdump -S -d $< > $@
 
-$(OBJS0): | $(OUT)
-$(OBJS1): | $(OUT)
-
 $(OUT):
 	mkdir $(OUT)
 
-$(OUT)/pru-core0.elf: $(OBJS0) | $(OUT)
-	$(CROSS_COMPILE)gcc $(CFLAGS) $^ $(LDFLAGS) -o $@
+$(ELF0): $(SRC0) $(HEADERS) | $(OUT)
+	$(CROSS_COMPILE)gcc $(CFLAGS) $(CFLAGS0) $(SRC0) $(LDFLAGS) -o $@
 
-$(OUT)/pru-core1.elf: $(OBJS1) | $(OUT)
-	$(CROSS_COMPILE)gcc $(CFLAGS) $^ $(LDFLAGS) -o $@
+$(ELF1): $(SRC1) $(HEADERS) | $(OUT)
+	$(CROSS_COMPILE)gcc $(CFLAGS) $(CFLAGS1) $(SRC1) $(LDFLAGS) -o $@
 
 clean:
-	$(RM) -fr pru-core0.elf pru-core1.elf $(OBJS0) $(OBJS1) $(OUT)
+	$(RM) -fr $(ELF0) $(ELF1) $(OUT)
 
 cscope:
 	cscope -bRk

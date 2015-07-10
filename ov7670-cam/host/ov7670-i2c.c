@@ -52,10 +52,9 @@ static int echo(const char *file, const char *val)
 	return 0;
 }
 
-static int ov7670_reset(void)
+static int ov7670_reset(const int gpio_n)
 {
 	const char *sysfs_dir = "/sys/class/gpio";
-	const int gpio_n = (2 * 32) + 2;	/* GPIO2_2 */
 	char path[256];
 	char val[256];
 	int st;
@@ -109,13 +108,13 @@ static int ov7670_write_regs(int fd, struct ov7670_reg *regs)
 	return 0;
 }
 
-int ov7670_i2c_setup(const int busid, const int i2c_addr)
+int ov7670_i2c_setup(const int busid, const int i2c_addr, const int reset_gpio)
 {
 	int fd;
 	int ret;
 	char filename[256];
 
-	if (ov7670_reset())
+	if (ov7670_reset(reset_gpio))
 		return -EIO;
 
 	snprintf(filename, sizeof(filename) - 1, "/dev/i2c-%d", busid);

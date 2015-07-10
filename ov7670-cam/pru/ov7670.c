@@ -33,9 +33,20 @@
 
 #define PRU_OCP_RATE_HZ		(200 * 1000 * 1000)
 #define PCLK_BIT		16	/* DO NOT CHANGE! */
-#define VSYNC_BIT		11
-#define HREF_BIT		10
-#define DATA_BIT		2
+
+#if defined(__AM335X_PRU0__)
+  #define VSYNC_BIT		15
+  #define HREF_BIT		14
+  #define DATA_BIT		0
+  #define PRU_CFG_GPCFG		PRU_CFG_GPCFG0
+#elif defined(__AM335X_PRU1__)
+  #define VSYNC_BIT		11
+  #define HREF_BIT		10
+  #define DATA_BIT		2
+  #define PRU_CFG_GPCFG		PRU_CFG_GPCFG1
+#else
+  #error "Please configure your PRU connection."
+#endif
 
 
 /*
@@ -55,10 +66,10 @@ unsigned long ov7670_init(unsigned long xclk_rate_hz)
 	PRU_CFG_SYSCFG.STANDBY_INIT = 0;
 
 	/* Set input parallel capture mode for R31 */
-	PRU_CFG_GPCFG1.GPI_MODE = 1;
-	PRU_CFG_GPCFG1.GPI_CLK_MODE = 0;
-	PRU_CFG_GPCFG1.GPI_DIV0 = 0;
-	PRU_CFG_GPCFG1.GPI_DIV1 = 0;
+	PRU_CFG_GPCFG.GPI_MODE = 1;
+	PRU_CFG_GPCFG.GPI_CLK_MODE = 0;
+	PRU_CFG_GPCFG.GPI_DIV0 = 0;
+	PRU_CFG_GPCFG.GPI_DIV1 = 0;
 
 	best_div1 = best_div0 = 0;
 	best_rate = PRU_OCP_RATE_HZ;
@@ -85,9 +96,9 @@ unsigned long ov7670_init(unsigned long xclk_rate_hz)
 	 * generating the XCLK output. PRU_R30_0 (Shift Data) will
 	 * be ignore, while PRU_R30_1 (Shift Clock) will clock OV7670.
 	 */
-	PRU_CFG_GPCFG1.GPO_MODE = 1;
-	PRU_CFG_GPCFG1.GPO_DIV0 = best_div0;
-	PRU_CFG_GPCFG1.GPO_DIV1 = best_div1;
+	PRU_CFG_GPCFG.GPO_MODE = 1;
+	PRU_CFG_GPCFG.GPO_DIV0 = best_div0;
+	PRU_CFG_GPCFG.GPO_DIV1 = best_div1;
 
 	/* Start shifting */
 	write_r30((1u << 29) | 0xaaaa);
