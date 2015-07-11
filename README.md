@@ -54,6 +54,7 @@ Acknowledgements:
  * Cape schematics and PCB are slightly modified copies of FlyingBone ( https://github.com/piranha32/FlyingBone ).
 
 Cape errata:
+ * The two OV7670 pin header connectors are too close to each other. This prevents two cameras to be plugged simultaneosly.
  * Female long-pin headers are needed for the 2x23 connectors to BBW. Drills are 0.8mm, so the common male pin headers cannot fit.
  * There is no voltage buffer between BBW (3.3V I/O) and OV7670 (2.7V I/O). In theory this could damage the camera, but nevertheless it works for me (tm).
  * Some component markings are not visible on the final PCB because silk screen overlaps solder pads.
