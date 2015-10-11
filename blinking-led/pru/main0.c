@@ -28,6 +28,8 @@
 
 #include <pru/io.h>
 
+#include "resource_table_0.h"
+
 /* A very rought estimate. TODO - do it properly! */
 static void delay_cycles(unsigned int n)
 {
