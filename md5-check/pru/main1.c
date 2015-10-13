@@ -30,19 +30,10 @@
 
 #include "md5.h"
 
-/* A very rought estimate. TODO - do it properly! */
-static void delay_cycles(unsigned int n)
-{
-	unsigned int i;
-
-	for (i = 0; i < n/2; i++)
-		asm volatile ("nop" : : );
-}
-
 static void delay_us(unsigned int us)
 {
 	/* assume cpu frequency is 200MHz */
-	delay_cycles (us * (1000 / 5));
+	__delay_cycles (us * (1000 / 5));
 }
 
 extern const char random_data_buf[];
