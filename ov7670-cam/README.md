@@ -13,6 +13,7 @@ How to run:
 	cp BB-BONE-OV7670-00A0.dtbo /lib/firmware/
 	echo BB-BONE-OV7670 > /sys/devices/bone_capemgr.*/slots
 	echo "BB-I2C1" > /sys/devices/bone_capemgr.*/slots
+	cd host-uio
 	./out/pload ../pru/out/pru-core0.elf ../pru/out/pru-core1.elf out0.ppm out1.ppm
 
 Acknowledgements:

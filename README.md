@@ -7,6 +7,8 @@ The following simple examples are available. Check the README.md in each subdire
 ## blinking-led
 The "hello world" example of the embedded world. Both PRU cores of a Beaglebone Black are started to toggle GPIOs. PRU0 core is programmed in C, while the firmware for PRU1 core is written in assembler.
 
+Two host loader examples are provided - one for the old UIO mechanism, and one for the new Remoteproc driver.
+
 ## blinking-led++
 Blinking led firmware written in C++.
 
