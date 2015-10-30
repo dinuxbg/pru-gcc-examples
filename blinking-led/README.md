@@ -24,9 +24,11 @@ Finally, to see a blinking led for 30 seconds on P9_27:
 
 ## Remoteproc host driver
 
-The example remoteproc driver has been taken from [beagleboard kernel branch 4.1](da821490ecd145e15d3aa3803c90ad8aef941eee), and patched with a minor fix to load ELF images from PRU Binutils.
+Download, flash and boot bone-debian-8.2-console-armhf-2015-10-25-2gb.img from http://elinux.org/Beagleboard:BeagleBoneBlack_Debian
 
-First download, flash and boot bone-debian-8.2-console-armhf-2015-10-11-2gb.img .
+If you need to use another kernel or distribution, please make sure to apply the remoteproc kernel fix for loading binutils PRU ELF:
+
+	host-remoteproc/0001-Fix-remoteproc-to-work-with-the-PRU-GNU-Binutils-por.patch
 
 Build and install firmware:
 
@@ -34,14 +36,10 @@ Build and install firmware:
 	make
 	sudo cp out/pru-core0.elf /lib/firmware/am335x-pru0-fw
 	sudo cp out/pru-core1.elf /lib/firmware/am335x-pru1-fw
+	sync
 
-Build and install the patched kernel module:
+Reload the remoteproc kernel module:
 
-	sudo apt update
-	sudo apt install build-essential linux-headers-`uname -r`
-	cd blinking-led/host-remoteproc/
-	make
-	sudo cp pruss_remoteproc.ko /lib/modules/`uname -r`/kernel/drivers/remoteproc/pruss_remoteproc.ko
 	sudo rmmod pruss_remoteproc
 	sudo modprobe pruss_remoteproc
 
@@ -49,11 +47,12 @@ If you get kernel warnings then just reboot. This is a known issue.
 
 In order to see the blinking led you'll need to configure the pin mux. Example for P9_27:
 
+	sudo apt update
 	sudo apt install git
 	git clone https://github.com/beagleboard/bb.org-overlays.git
 	cd bb.org-overlays
 	./dtc-overlay.sh
-	./install
+	./install.sh
 	reboot
 	sudo sh -c "echo 'cape-universal' > /sys/devices/platform/bone_capemgr/slots"
 	sudo sh -c "echo 'pruout' > /sys/devices/platform/ocp/ocp:P9_27_pinmux/state"
