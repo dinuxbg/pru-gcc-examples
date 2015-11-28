@@ -12,11 +12,14 @@ Two host loader examples are provided - one for the old UIO mechanism, and one f
 ## blinking-led++
 Blinking led firmware written in C++.
 
+## hc-sr04-range-sensor
+Remoteproc/rpmsg example for measuring distance using the HC-SR04 ultrasound range sensor.
+
 ## md5-check
-Calculate MD5 checksum for a known data chunk on both the ARM loader and one PRU core. Then ARM loader reads and compares the two checksums.
+Calculate MD5 checksum for a known data chunk on both the ARM loader and one PRU core. Then UIO-based loader reads and compares the two checksums.
 
 ## ov7670-cam
-PRUs on a Beaglebone White fetch RGB565 streams from two OV7670 camera modules. The host-side loader then saves the images from the shared DDR-SDRAM memory into PPM files. The example shows how to access shared buffers in DDR-SDRAM, and how to write time-critical code sequences in inline assembly.
+PRUs on a Beaglebone White fetch RGB565 streams from two OV7670 camera modules. The UIO host-side loader then saves the images from the shared DDR-SDRAM memory into PPM files. The example shows how to access shared buffers in DDR-SDRAM, and how to write time-critical code sequences in inline assembly.
 
 ## sim-hello
 Simulate your PRU executable on your PC. Note that pru-run is an ISA only simulator. Digital I/O is not simulated. Neither is OCP access.
