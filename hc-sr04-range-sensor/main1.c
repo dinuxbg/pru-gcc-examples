@@ -78,70 +78,101 @@
 
 char payload[RPMSG_BUF_SIZE];
 
-/*
- * main.c
- */
+static int measure_distance_mm(void)
+{
+	int t_us = hc_sr04_measure_pulse();
+	int d_mm;
+
+	/*
+	 * Print the distance received from the sonar
+	 * At 20 degrees in dry air the speed of sound is 3422 mm/sec
+	 * so it takes 2.912 us to make 1 mm, i.e. 5.844 us for a
+	 * roundtrip of 1 mm.
+	 */
+	d_mm = (t_us * 1000) / 5844;
+	if (t_us < 0)
+		d_mm = -1;
+
+	return d_mm;
+}
+
+static void handle_mailbox_interrupt(struct pru_rpmsg_transport *transport)
+{
+	int16_t st;
+	uint16_t src, dst, len;
+
+	/* Clear the mailbox interrupt */
+	CT_MBX.IRQ[MB_USER].STATUS_CLR |= 1 << (MB_FROM_ARM_HOST * 2);
+
+	/* Clear the event status, event MB_INT_NUMBER
+	 * corresponds to the mailbox interrupt */
+	CT_INTC.SICR_bit.STS_CLR_IDX = MB_INT_NUMBER;
+
+	/* read all of the current messages in the mailbox */
+	while (CT_MBX.MSGSTATUS_bit[MB_FROM_ARM_HOST].NBOFMSG > 0) {
+		/* Check to see if the message corresponds
+		 * to a receive event for the PRU */
+		if (CT_MBX.MESSAGE[MB_FROM_ARM_HOST] == 1){
+			/* Receive the message */
+			st = pru_rpmsg_receive(transport, &src, &dst,
+						payload, &len);
+			if (st == PRU_RPMSG_SUCCESS) {
+				int d_mm = measure_distance_mm();
+
+				/* there is no room in IRAM for iprintf */
+				itoa(d_mm, payload, 10);
+
+				pru_rpmsg_send(transport, dst, src,
+						payload, strlen(payload) + 1);
+			}
+		}
+	}
+}
+
 int main(void)
 {
 	struct pru_rpmsg_transport transport;
-	uint16_t src, dst, len;
 	volatile uint8_t *status;
 
-	/* allow OCP master port access by the PRU so the PRU can read external memories */
+	/* allow OCP master port access by the PRU so the PRU
+	 * can read external memories */
 	CT_CFG.SYSCFG_bit.STANDBY_INIT = 0;
 
-	/* clear the status of event MB_INT_NUMBER (the mailbox event) and enable the mailbox event */
+	/* clear the status of event MB_INT_NUMBER (the mailbox event)
+	 * and enable the mailbox event */
 	CT_INTC.SICR_bit.STS_CLR_IDX = MB_INT_NUMBER;
 	CT_MBX.IRQ[MB_USER].ENABLE_SET |= 1 << (MB_FROM_ARM_HOST * 2);
 
 	/* Make sure the Linux drivers are ready for RPMsg communication */
 	status = &resourceTable.rpmsg_vdev.status;
-	while (!(*status & VIRTIO_CONFIG_S_DRIVER_OK));
+	while (!(*status & VIRTIO_CONFIG_S_DRIVER_OK))
+		;
 
-	/* Initialize pru_virtqueue corresponding to vring0 (PRU to ARM Host direction) */
-	pru_virtqueue_init(&transport.virtqueue0, &resourceTable.rpmsg_vring0, &CT_MBX.MESSAGE[MB_TO_ARM_HOST], &CT_MBX.MESSAGE[MB_FROM_ARM_HOST]);
+	/* Initialize pru_virtqueue corresponding
+	 * to vring0 (PRU to ARM Host direction) */
+	pru_virtqueue_init(&transport.virtqueue0,
+			&resourceTable.rpmsg_vring0,
+			&CT_MBX.MESSAGE[MB_TO_ARM_HOST],
+			&CT_MBX.MESSAGE[MB_FROM_ARM_HOST]);
 
-	/* Initialize pru_virtqueue corresponding to vring1 (ARM Host to PRU direction) */
-	pru_virtqueue_init(&transport.virtqueue1, &resourceTable.rpmsg_vring1, &CT_MBX.MESSAGE[MB_TO_ARM_HOST], &CT_MBX.MESSAGE[MB_FROM_ARM_HOST]);
+	/* Initialize pru_virtqueue corresponding
+	 * to vring1 (ARM Host to PRU direction) */
+	pru_virtqueue_init(&transport.virtqueue1,
+			&resourceTable.rpmsg_vring1,
+			&CT_MBX.MESSAGE[MB_TO_ARM_HOST],
+			&CT_MBX.MESSAGE[MB_FROM_ARM_HOST]);
 
 	/* Create the RPMsg channel between the PRU and ARM user space using the transport structure. */
-	while (pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, CHAN_NAME, CHAN_DESC, CHAN_PORT) != PRU_RPMSG_SUCCESS);
+	while (pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, CHAN_NAME, CHAN_DESC, CHAN_PORT) != PRU_RPMSG_SUCCESS)
+		;
 
 	hc_sr04_init();
 
 	while (1) {
-		/* Check bit 31 of register R31 to see if the mailbox interrupt has occurred */
-		unsigned int r31 = read_r31();
-		if(r31 & HOST_INT){
-			/* Clear the mailbox interrupt */
-			CT_MBX.IRQ[MB_USER].STATUS_CLR |= 1 << (MB_FROM_ARM_HOST * 2);
-			/* Clear the event status, event MB_INT_NUMBER corresponds to the mailbox interrupt */
-			CT_INTC.SICR_bit.STS_CLR_IDX = MB_INT_NUMBER;
-			/* Use a while loop to read all of the current messages in the mailbox */
-			while(CT_MBX.MSGSTATUS_bit[MB_FROM_ARM_HOST].NBOFMSG > 0){
-				/* Check to see if the message corresponds to a receive event for the PRU */
-				if(CT_MBX.MESSAGE[MB_FROM_ARM_HOST] == 1){
-					/* Receive the message */
-					if(pru_rpmsg_receive(&transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
-						int t_us = hc_sr04_measure_pulse();
-						int d_mm;
-
-						/*
-						 * Print the distance received from the sonar
-						 * At 20 degrees in dry air the speed of sound is 3422 mm/sec
-						 * so it takes 2.912 us to make 1 mm, i.e. 5.844 us for a roundtrip of 1 mm
-						 */
-						d_mm = (t_us * 1000) / 5844;
-						if (t_us < 0)
-							d_mm = -1;
-
-						/* there is no room in IRAM for iprintf */
-						itoa(d_mm, payload, 10);
-
-						pru_rpmsg_send(&transport, dst, src, payload, strlen(payload) + 1);
-					}
-				}
-			}
+		/* Check bit 31 of register R31 to see
+		 * if the mailbox interrupt has occurred */
+		if (read_r31() & HOST_INT) {
+			handle_mailbox_interrupt(&transport);
 		}
 	}
 
