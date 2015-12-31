@@ -17,12 +17,12 @@
 #define CPU_HZ	(200 * 1000 * 1000)
 
 	.text
-	.section .init0
+	.section .init0, "x"
 	.global	__start
 __start:
 	/* Initialize stack pointer. */
-	ldi	sp.w2, %hi(__stack_top)
-	ldi	sp.w0, %lo(__stack_top)
+	ldi	sp, %lo(__stack_top)
+	ldi	sp.w2, %hi_rlz(__stack_top)
 	jmp	main
 
 	.text
@@ -32,13 +32,13 @@ main:
 	ldi	r1, 0xffff
 
 main_loop:
-	ldi	r14.w2, %hi(CPU_HZ / 4)
-	ldi	r14.w0, %lo(CPU_HZ / 4)
+	ldi	r14, %lo(CPU_HZ / 4)
+	ldi	r14.w2, %hi_rlz(CPU_HZ / 4)
 	call	delay_n2_cycles
 	/* DING */
 	mov	r30, r0
-	ldi	r14.w2, %hi(CPU_HZ / 4)
-	ldi	r14.w0, %lo(CPU_HZ / 4)
+	ldi	r14, %lo(CPU_HZ / 4)
+	ldi	r14.w2, %hi_rlz(CPU_HZ / 4)
 	call	delay_n2_cycles
 	/* DONG */
 	mov	r30, r1
