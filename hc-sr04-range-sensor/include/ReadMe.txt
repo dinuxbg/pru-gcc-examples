@@ -1,4 +1,4 @@
-Programmable Real-time Unit (PRU) Software Support Package 
+Programmable Real-time Unit (PRU) Software Support Package
 ------------------------------------------------------------
 ============================================================
    INCLUDE
@@ -6,7 +6,7 @@ Programmable Real-time Unit (PRU) Software Support Package
 
 DESCRIPTION
 
-   This directory provides header files for PRU firmware.  
+   This directory provides header files for PRU firmware.
 
    For more details about these header files, visit:
 
@@ -16,10 +16,10 @@ DESCRIPTION
 
 ADDITIONAL RESOURCES
 
-   For more information about the PRU, visit: 
+   For more information about the PRU, visit:
 
-	PRU-ICSS Wiki            – http://processors.wiki.ti.com/index.php/PRU-ICSS
-	PRU Training Slides      – http://www.ti.com/sitarabootcamp
-	PRU Evaluation Hardware  – http://www.ti.com/tool/PRUCAPE
-        Support                  – http://e2e.ti.com
-   
+	PRU-ICSS Wiki            - http://processors.wiki.ti.com/index.php/PRU-ICSS
+	PRU Training Slides      - http://www.ti.com/sitarabootcamp
+	PRU Evaluation Hardware  - http://www.ti.com/tool/PRUCAPE
+        Support                  - http://e2e.ti.com
+

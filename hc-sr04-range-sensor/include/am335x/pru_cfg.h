@@ -1,33 +1,33 @@
 /*
- * Copyright (C) 2015 Texas Instruments Incorporated - http://www.ti.com/ 
- *  
- *  
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions 
+ * Copyright (C) 2015 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
  * are met:
- * 
- * 	* Redistributions of source code must retain the above copyright 
- * 	  notice, this list of conditions and the following disclaimer.
- * 
- * 	* Redistributions in binary form must reproduce the above copyright
- * 	  notice, this list of conditions and the following disclaimer in the 
- * 	  documentation and/or other materials provided with the   
- * 	  distribution.
- * 
- * 	* Neither the name of Texas Instruments Incorporated nor the names of
- * 	  its contributors may be used to endorse or promote products derived
- * 	  from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+ *
+ *	* Redistributions of source code must retain the above copyright
+ *	  notice, this list of conditions and the following disclaimer.
+ *
+ *	* Redistributions in binary form must reproduce the above copyright
+ *	  notice, this list of conditions and the following disclaimer in the
+ *	  documentation and/or other materials provided with the
+ *	  distribution.
+ *
+ *	* Neither the name of Texas Instruments Incorporated nor the names of
+ *	  its contributors may be used to endorse or promote products derived
+ *	  from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
@@ -35,7 +35,7 @@
 #define _PRU_CFG_H_
 
 /* PRU_CFG register set */
-typedef struct{
+typedef struct {
 
 	/* PRU_CFG_REVID register bit field */
 	union {
@@ -44,28 +44,28 @@ typedef struct{
 		volatile struct {
 			unsigned REVID : 32;
 		} REVID_bit;
-	} ;	// 0x0
+	};	// 0x0
 
 
 	/* PRU_CFG_SYSCFG register bit field */
 	union {
 		volatile uint32_t SYSCFG;
 
-		volatile struct{
+		volatile struct {
 			unsigned IDLE_MODE : 2;
 			unsigned STANDBY_MODE : 2;
 			unsigned STANDBY_INIT : 1;
 			unsigned SUB_MWAIT : 1;
 			unsigned rsvd6 : 26;
 		} SYSCFG_bit;
-	} ;	// 0x4
+	};	// 0x4
 
 
 	/* PRU_CFG_GPCFG0 register bit field */
 	union {
 		volatile uint32_t GPCFG0;
 
-		volatile struct{
+		volatile struct {
 			unsigned PRU0_GPI_MODE : 2;	// 1:0
 			unsigned PRU0_GPI_CLK_MODE : 1;	// 2
 			unsigned PRU0_GPI_DIV0 : 5;	// 7:3
@@ -77,14 +77,14 @@ typedef struct{
 			unsigned PRU0_GPO_SH_SEL : 1;	// 25
 			unsigned rsvd26 : 6;		// 31:26
 		} GPCFG0_bit;
-	} ;	// 0x8
+	};	// 0x8
 
 
 	/* PRU_CFG_GPCFG1 register bit field */
 	union {
 		volatile uint32_t GPCFG1;
 
-		volatile struct{
+		volatile struct {
 			unsigned PRU1_GPI_MODE : 2;	// 1:0
 			unsigned PRU1_GPI_CLK_MODE : 1;	// 2
 			unsigned PRU1_GPI_DIV0 : 5;	// 7:3
@@ -96,14 +96,14 @@ typedef struct{
 			unsigned PRU1_GPO_SH_SEL : 1;	// 25
 			unsigned rsvd26 : 6;		// 31:26
 		} GPCFG1_bit;
-	} ;	// 0xC
+	};	// 0xC
 
 
 	/* PRU_CFG_CGR register bit field */
 	union {
 		volatile uint32_t CGR;
 
-		volatile struct{
+		volatile struct {
 			unsigned PRU0_CLK_STOP_REQ : 1;	// 0
 			unsigned PRU0_CLK_STOP_ACK : 1;	// 1
 			unsigned PRU0_CLK_EN : 1;	// 2
@@ -124,14 +124,14 @@ typedef struct{
 			unsigned IEP_CLK_EN : 1;	// 17
 			unsigned rsvd18 : 14;		// 31:18
 		} CGR_bit;
-	} ;	// 0x10
+	};	// 0x10
 
 
 	/* PRU_CFG_ISRP register bit field */
 	union {
 		volatile uint32_t ISRP;
 
-		volatile  struct{
+		volatile  struct {
 			unsigned PRU0_IMEM_PE_RAW : 4;	// 3:0
 			unsigned PRU0_DMEM_PE_RAW : 4;	// 7:4
 			unsigned PRU1_IMEM_PE_RAW : 4;	// 11:8
@@ -139,14 +139,14 @@ typedef struct{
 			unsigned RAM_PE_RAW : 4;	// 19:16
 			unsigned rsvd20 : 12;		// 31:20
 		} ISRP_bit;
-	} ;	// 0x14
+	};	// 0x14
 
 
 	/* PRU_CFG_ISP register bit field */
 	union {
 		volatile uint32_t ISP;
 
-		volatile  struct{
+		volatile  struct {
 			unsigned PRU0_IMEM_PE : 4;	// 3:0
 			unsigned PRU0_DMEM_PE : 4;	// 7:4
 			unsigned PRU1_IMEM_PE : 4;	// 11:8
@@ -154,13 +154,13 @@ typedef struct{
 			unsigned RAM_PE : 4;		// 19:16
 			unsigned rsvd20 : 12;		// 31:20
 		} ISP_bit;
-	} ;	// 0x18
+	};	// 0x18
 
 	/* PRU_CFG_IESP register bit field */
 	union {
 		volatile uint32_t IESP;
 
-		volatile struct{
+		volatile struct {
 			unsigned PRU0_IMEM_PE_SET : 4;	// 3:0
 			unsigned PRU0_DMEM_PE_SET : 4;	// 7:4
 			unsigned PRU1_IMEM_PE_SET : 4;	// 11:8
@@ -168,21 +168,21 @@ typedef struct{
 			unsigned RAM_PE_SET : 4;	// 19:16
 			unsigned rsvd20 : 12;		// 31:20
 		} IESP_bit;
-	} ;	// 0x1C
+	};	// 0x1C
 
 
 	/* PRU_CFG_IECP register bit field */
 	union {
 		volatile uint32_t IECP;
 
-		volatile struct{
+		volatile struct {
 			unsigned PRU0_IMEM_PE_CLR : 4;	// 3:0
 			unsigned PRU0_DMEM_PE_CLR : 4;	// 7:4
 			unsigned PRU1_IMEM_PE_CLR : 4;	// 11:8
 			unsigned PRU1_DMEM_PE_CLR : 4;	// 15:12
 			unsigned rsvd16 : 16;		// 31:16
 		} IECP_bit;
-	} ;	// 0x20
+	};	// 0x20
 
 
 	uint32_t rsvd24;	// 0x24
@@ -192,38 +192,38 @@ typedef struct{
 	union {
 		volatile uint32_t PMAO;
 
-		volatile struct{
+		volatile struct {
 			unsigned PMAO_PRU0 : 1;		// 0
 			unsigned PMAO_PRU1 : 1;		// 1
 			unsigned rsvd2 : 30;		// 31:2
 		} PMAO_bit;
-	} ;	// 0x28
+	};	// 0x28
 
 
-        uint32_t rsvd2c[1];     // 0x2C
+	uint32_t rsvd2c[1];     // 0x2C
 
 
 	/* PRU_CFG_IEPCLK register bit field */
 	union {
 		volatile uint32_t IEPCLK;
 
-		volatile struct{
+		volatile struct {
 			unsigned OCP_EN : 1;		// 0
 			unsigned rsvd1 : 31;		// 31:1
 		} IEPCLK_bit;
-	} ;	// 0x30
+	};	// 0x30
 
 
 	/* PRU_CFG_SPP register bit field */
 	union {
 		volatile uint32_t SPP;
 
-		volatile struct{
+		volatile struct {
 			unsigned PRU1_PAD_HP_EN : 1;	// 0
 			unsigned XFR_SHIFT_EN : 1;	// 1
 			unsigned rsvd2 : 30;		// 31:2
 		} SPP_bit;
-	} ;	// 0x34
+	};	// 0x34
 
 
 	uint32_t rsvd38[2];	// 0x38 - 0x3C
@@ -236,7 +236,7 @@ typedef struct{
 			unsigned PIN_MUX_SEL : 8;	// 7:0
 			unsigned rsvd2 : 24;		// 31:8
 		} PIN_MX_bit;
-	} ;	//0x40
+	};	//0x40
 } pruCfg;
 
 #ifdef __GNUC__
