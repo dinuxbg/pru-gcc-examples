@@ -1,4 +1,7 @@
 # ov7670-cam
+
+NOTE: The following instructions are targeted towards old Debian image versions. They will not work with Debian 8.6 images. Must bring them up-to-date, or altogether migrate to remoteproc!
+
 For information how to connect the OV7670 camera module to BeagleBone White, please see the included KiCad schematic. A cape PCB project is also included.
 
 The example can work either with two cameras simultaneously, or, with some harmless warnings, only one camera module.

@@ -21,9 +21,8 @@ There is a good explanation in https://github.com/HudsonWerks/Range-Sensor-PRU, 
 > NOTE: The resistors are important. Since the sensor emits a 5V signal, and the Beaglebone Black's input pins are only 3.3V, using resistors or voltage converters is crucial for preventing damage to your board.
 
 ## Building and running the example
-Download, flash and boot bone-debian-8.2-console-armhf-2015-11-15-2gb.img from http://elinux.org/Beagleboard:BeagleBoneBlack_Debian
 
-If you need to use another kernel or distribution, then please make sure to apply the remoteproc kernel fix for loading binutils PRU ELF, and the TI's PRU rpmsg patches.
+First setup remoteproc driver by following [../REMOTEPROC.md](../REMOTEPROC.md).
 
 Build and install firmware:
 
