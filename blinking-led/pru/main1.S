@@ -18,11 +18,10 @@
 
 	.text
 	.section .init0, "x"
-	.global	__start
-__start:
+	.global	_start
+_start:
 	/* Initialize stack pointer. */
-	ldi	sp, %lo(__stack_top)
-	ldi	sp.w2, %hi_rlz(__stack_top)
+	ldi32	sp, _stack_top
 	jmp	main
 
 	.text
@@ -32,13 +31,11 @@ main:
 	ldi	r1, 0xffff
 
 main_loop:
-	ldi	r14, %lo(CPU_HZ / 4)
-	ldi	r14.w2, %hi_rlz(CPU_HZ / 4)
+	ldi32	r14, CPU_HZ / 4
 	call	delay_n2_cycles
 	/* DING */
 	mov	r30, r0
-	ldi	r14, %lo(CPU_HZ / 4)
-	ldi	r14.w2, %hi_rlz(CPU_HZ / 4)
+	ldi32	r14, CPU_HZ / 4
 	call	delay_n2_cycles
 	/* DONG */
 	mov	r30, r1

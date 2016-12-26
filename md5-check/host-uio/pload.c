@@ -215,7 +215,7 @@ static int pru_check_md5sum(struct prufw *fw)
 	MD5_Update(&md5ctx, random_data_buf, random_data_buf_size);
 	MD5_Final(md5ref, &md5ctx);
 
-	if (pru_find_symbol_addr(fw, "_md5res", &md5_offset)) {
+	if (pru_find_symbol_addr(fw, "md5res", &md5_offset)) {
 		warnx("no MD5 buffer found in PRU%d firmware\n", fw->coreid);
 		return -EIO;
 	}

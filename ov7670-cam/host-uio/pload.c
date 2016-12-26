@@ -208,7 +208,7 @@ static int pru_write_videomem_addr(struct prufw *fw, const uint32_t addr)
 {
 	uint32_t pru_vmem_ptr_offset;
 
-	if (pru_find_symbol_addr(fw, "_video_memory", &pru_vmem_ptr_offset)) {
+	if (pru_find_symbol_addr(fw, "video_memory", &pru_vmem_ptr_offset)) {
 		warnx("no VMEM pointer found in PRU%d firmware\n", fw->coreid);
 		return -EIO;
 	}
@@ -249,7 +249,7 @@ static int pru_read_var(struct prufw *fw, const char *var, uint32_t *val)
 static void dump_stats(struct prufw *fw)
 {
 	uint32_t val;
-	if (!pru_read_var(fw, "_num_frames", &val))
+	if (!pru_read_var(fw, "num_frames", &val))
 		printf("PRU%d:   num_frames=%u\n", fw->coreid, val);
 }
 
