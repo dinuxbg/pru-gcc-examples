@@ -73,6 +73,18 @@ $(OUT)/%.s : %.c
 %.s : %.elf
 	$(CROSS_COMPILE)objdump -S -d $< > $@
 
+# Binary images for IMEM and DMEM memories. Might be useful
+# for firmware loaders that cannot handle ELF.
+%.imem.bin : %.elf
+	$(CROSS_COMPILE)objcopy -O binary  --only-section=.text* $< $@
+
+%.dmem.bin : %.elf
+	$(CROSS_COMPILE)objcopy -O binary              \
+	  --only-section=.data*                        \
+	  --only-section=.bss*                         \
+	  --set-section-flags .bss=alloc,load,contents \
+	  $< $@
+
 $(OBJS0): | $(OUT)
 $(OBJS1): | $(OUT)
 
