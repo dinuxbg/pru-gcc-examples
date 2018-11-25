@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name bga)(type KiCad)(uri $KIPRJMOD/bga-6.pretty)(options "")(descr ""))
+  (lib (name connectors)(type KiCad)(uri $KIPRJMOD/connectors.pretty)(options "")(descr ""))
+)

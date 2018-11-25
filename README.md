@@ -4,6 +4,9 @@ The pru-gcc toolchain source and build instructions are located at https://githu
 
 The following simple examples are available. Check the README.md in each subdirectory for detailed instructions.
 
+## beaglemic
+Capture data from 16 PDM microphones simultaneously, convert, and save multichannel PCM audio.
+
 ## blinking-led
 The "hello world" example of the embedded world. Both PRU cores of a Beaglebone Black are started to toggle GPIOs. PRU0 core is programmed in C, while the firmware for PRU1 core is written in assembler.
 
