@@ -17,8 +17,8 @@ config-pin P9_27 pruin	# pru0_pru_r31_5
 config-pin P9_25 pruin	# pru0_pru_r31_7
 
 # Outputs
-config-pin P2_24 pruout	# pru0_pru_r30_14
-config-pin P2_33 pruout	# pru0_pru_r30_15
+config-pin P8_12 pruout	# pru0_pru_r30_14
+config-pin P8_11 pruout	# pru0_pru_r30_15
 
 cp out/pru-core0.elf /lib/firmware/
 cp out/pru-core1.elf /lib/firmware/
