@@ -34,6 +34,9 @@ CROSS_COMPILE ?= pru-
 CFLAGS += -g -Os
 CFLAGS += -Wall -Wextra
 
+# See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99578
+CFLAGS += -Wno-array-bounds
+
 # Headers needed by the TI rpmsg library.
 CFLAGS += -I./include -I./include/am335x
 

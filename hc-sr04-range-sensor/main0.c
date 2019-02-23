@@ -28,8 +28,6 @@
 
 #include <pru/io.h>
 
-#include "resource_table_0.h"
-
 int main(void)
 {
 	__halt();
