@@ -63,6 +63,8 @@ A few ideas to improve the design:
  * If input is limited toto 8 microphones, then process and output 24bit PCM data.
  * Move comb filters to PRU1, and try to add more integrators in PRU0.
  * Clean-up the cape PCB.
+   * Design a cape with soldered mics. Current split design with wires is difficult to make.
+   * Add LEDs to show beamforming activity.
 
 # References
  * [CIC Filter Introduction](https://dspguru.com/dsp/tutorials/cic-filter-introduction/)

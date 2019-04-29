@@ -21,4 +21,7 @@
 #define SCRATCH_BANK_2	12
 #define PEER_PRU_BANK	14
 
+#define CMD_START	0x01
+#define CMD_STOP	0x02
+
 #endif	/* __COMMON_H__ */

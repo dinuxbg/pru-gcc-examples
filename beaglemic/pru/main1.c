@@ -92,10 +92,12 @@ static void handle_host_interrupt(struct pru_rpmsg_transport *transport)
 
 	/* Receive all available messages, multiple messages can be sent per kick */
 	while (pru_rpmsg_receive(transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
-		if (!rpmsg_settings.initialized) {
+		if (payload[0] == CMD_START) {
 			rpmsg_settings.src = src;
 			rpmsg_settings.dst = dst;
 			rpmsg_settings.initialized = true;
+		} else if (payload[0] == CMD_STOP) {
+			rpmsg_settings.initialized = false;
 		}
 
 		/* TODO - send runtime init config to PRU peer. */

@@ -36,13 +36,28 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
+#include <signal.h>
 
 #define RPMSG_BUF_SIZE	512
 
+#define CMD_START	0x01
+#define CMD_STOP	0x02
+
 struct pru_start_rec {
 	/* TODO - pass some options. */
-	uint8_t dummy;
+	uint8_t cmd;
 } __attribute__((__packed__));
+
+struct pru_stop_rec {
+	uint8_t cmd;
+} __attribute__((__packed__));
+
+static volatile bool exit_flag;
+
+static void ctrl_c_signal_handler(int dummy __attribute__((unused)))
+{
+	exit_flag = true;
+}
 
 static void print_progress(unsigned int frcnt, ssize_t n)
 {
@@ -64,6 +79,14 @@ static void print_progress(unsigned int frcnt, ssize_t n)
 	t_last_print = t;
 	fprintf(stderr, "\rFrame: %-16u   (%zd:% 16zd)", frcnt, n, total_bytes);
 	fflush(stderr);
+}
+
+static void stop_stream(int fd)
+{
+	struct pru_stop_rec rec;
+
+	rec.cmd = CMD_STOP;
+	write(fd, &rec, sizeof(rec));
 }
 
 /* You probably want to pipe to sox:
@@ -91,10 +114,13 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	/* Initiate audio record with a dummy packet. */
+	signal(SIGINT, ctrl_c_signal_handler);
+
+	/* Initiate audio record. */
+	recopts.cmd = CMD_START;
 	write(fd, &recopts, sizeof(recopts));
 
-	while (true) {
+	while (!exit_flag) {
 		uint8_t buf[RPMSG_BUF_SIZE];
 		unsigned int frcnt;
 		ssize_t n = read(fd, buf, sizeof(buf));
@@ -116,7 +142,7 @@ int main(int argc, char *argv[])
 		frcnt |= (unsigned long)buf[n - 1] << 24;
 		print_progress(frcnt, n - 4);
 	}
-
+	stop_stream(fd);
 	close(fd);
 
 	return EXIT_SUCCESS;
