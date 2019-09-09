@@ -37,6 +37,9 @@ CXXFLAGS += -mmcu=am335x.pru0
 
 CXXFLAGS += -fno-rtti
 
+# Include remoteproc headers.
+CXXFLAGS += -isystem include
+
 # Define this to squeeze code size by removing atexit, exit, constructors
 # and destructors from CRT.
 CXXFLAGS += -minrt

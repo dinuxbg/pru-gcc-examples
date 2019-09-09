@@ -34,6 +34,9 @@ CROSS_COMPILE ?= pru-
 CFLAGS += -g -Os
 CFLAGS += -Wall -Wextra
 
+# Add remoteproc headers
+CFLAGS += -isystem include
+
 # Define this to squeeze code size by removing atexit, exit, constructors
 # and destructors from CRT.
 CFLAGS += -minrt
