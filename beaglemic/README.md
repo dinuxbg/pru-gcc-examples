@@ -30,7 +30,7 @@ The schematic is simple. PDM microphones' digital outputs are connected directly
 
 For each microphone pair, one microphone is configured to output data on the rising clock edge, and the other is configured to output data on the falling edge. This way we need only 8 input GPIOs to capture data from all 16 microphones.
 
-Microphone breakout board and a PocketBeagle Cape are provided in KiCad format. The cape PCB is only for convenience **and has not been tested yet**. You can easily use a breadboard and wires instead.
+Microphone breakout board and a PocketBeagle Cape are provided in KiCad format.
 
 Unfortunately the breakout board is essential for a home DIY user like me, since all PDM microphones I could find are BGA. There are numerous youtube guides how to solder BGAs at home using a skillet or a toaster oven.
 
@@ -60,7 +60,7 @@ The host program simply gets data from the RPMSG device file and dumps it on its
 # Further Work
 A few ideas to improve the design:
 
- * If input is limited toto 8 microphones, then process and output 24bit PCM data.
+ * If input is limited to 8 microphones, then process and output 24bit PCM data.
  * Move comb filters to PRU1, and try to add more integrators in PRU0.
  * Clean-up the cape PCB.
    * Design a cape with soldered mics. Current split design with wires is difficult to make.
