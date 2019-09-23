@@ -50,6 +50,8 @@
 
 #include "common.h"
 
+#include "../driver/beaglemic-rpc.h"
+
 /* Host-1 Interrupt sets bit 31 in register R31 */
 #define HOST_INT			((uint32_t) 1 << 31)
 /* Peer PRU Interrupt sets bit 30 in register R31 */
@@ -65,8 +67,6 @@
 #define FROM_PEER			21
 
 
-#define CHAN_NAME			"rpmsg-pru"
-
 #define CHAN_DESC			"Channel 31"
 #define CHAN_PORT			31
 
@@ -78,10 +78,26 @@
 
 char payload[RPMSG_BUF_SIZE];
 struct {
+	/* RPMSG channel settings. */
 	uint16_t src;
 	uint16_t dst;
+
+	/* Is stream initialized by host (i.e. is it running). */
 	bool initialized;
-} rpmsg_settings;
+
+	uint32_t dma_addr;
+	uint32_t dma_bytes;
+	uint32_t period_size;
+	uint32_t dma_i;
+} stream;
+
+static void prepare_stream(struct beaglemic_pru_prepare_rec *prep)
+{
+	stream.dma_addr = prep->buffer_addr;
+	stream.dma_bytes = prep->buffer_nbytes;
+	stream.period_size = prep->period_size;
+	stream.dma_i = 0;
+}
 
 static void handle_host_interrupt(struct pru_rpmsg_transport *transport)
 {
@@ -92,15 +108,24 @@ static void handle_host_interrupt(struct pru_rpmsg_transport *transport)
 
 	/* Receive all available messages, multiple messages can be sent per kick */
 	while (pru_rpmsg_receive(transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
-		if (payload[0] == CMD_START) {
-			rpmsg_settings.src = src;
-			rpmsg_settings.dst = dst;
-			rpmsg_settings.initialized = true;
-		} else if (payload[0] == CMD_STOP) {
-			rpmsg_settings.initialized = false;
+		switch (payload[0]) {
+		case BEAGLEMIC_PRUCMD_PREPARE:
+			stream.src = src;
+			stream.dst = dst;
+			stream.initialized = false;
+			if (len == sizeof(struct beaglemic_pru_prepare_rec))
+				prepare_stream((struct beaglemic_pru_prepare_rec *) payload);
+			break;
+		case BEAGLEMIC_PRUCMD_START:
+			stream.initialized = true;
+			break;
+		case BEAGLEMIC_PRUCMD_STOP:
+			stream.initialized = false;
+			break;
+		default:
+			/* TODO - handle errors. */
+			break;
 		}
-
-		/* TODO - send runtime init config to PRU peer. */
 	}
 }
 
@@ -132,27 +157,31 @@ static inline unsigned int acquire_frame_from_peer(void *bufptr)
 
 static void handle_peer_interrupt(struct pru_rpmsg_transport *transport)
 {
-	static int buflen;
-	static char pcmbuf[RPMSG_BUF_SIZE];
 	unsigned int frame_counter;
 
 	/* Clear the event status */
 	CT_INTC.SICR_bit.STS_CLR_IDX = FROM_PEER;
 
-	frame_counter = acquire_frame_from_peer(&pcmbuf[buflen]);
-	buflen += 16 * 2;
+	if (!stream.dma_addr || !stream.dma_bytes || !stream.period_size)
+		return;
 
-	if (buflen == (16 * 2 * 15)) {
-		pcmbuf[buflen + 0] = frame_counter >> 0;
-		pcmbuf[buflen + 1] = frame_counter >> 8;
-		pcmbuf[buflen + 2] = frame_counter >> 16;
-		pcmbuf[buflen + 3] = frame_counter >> 24;
+	frame_counter = acquire_frame_from_peer((void *)(stream.dma_addr + stream.dma_i));
+	stream.dma_i += 16 * 2;
 
-		/* 16*2*15 + 4 = 484 bytes per message. */
-                pru_rpmsg_send(transport, rpmsg_settings.dst,
-			       rpmsg_settings.src,
-                               pcmbuf, buflen + 4);
-		buflen = 0;
+	if (stream.dma_i >= stream.dma_bytes)
+		stream.dma_i = 0;
+
+	if ((stream.dma_i % stream.period_size) == 0) {
+		struct beaglemic_pru_status hwst;
+
+		hwst.hwptr = stream.dma_i;
+		hwst.err = 0;	/* TODO */
+		hwst.frame_counter = frame_counter;
+
+		/* Send HW pointer IRQ to host. */
+		pru_rpmsg_send(transport, stream.dst,
+			       stream.src,
+			       &hwst, sizeof(hwst));
 	}
 }
 
@@ -181,7 +210,7 @@ int main(void)
 		       FROM_ARM_HOST);
 
 	/* Create the RPMsg channel between the PRU and ARM user space using the transport structure. */
-	while (pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, CHAN_NAME, CHAN_DESC, CHAN_PORT) != PRU_RPMSG_SUCCESS)
+	while (pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, RPMSG_BEAGLEMIC_CHAN_NAME, CHAN_DESC, CHAN_PORT) != PRU_RPMSG_SUCCESS)
 		;
 
 	while (1) {
@@ -190,7 +219,7 @@ int main(void)
 		if (read_r31() & HOST_INT) {
 			handle_host_interrupt(&transport);
 		}
-		if (rpmsg_settings.initialized && (read_r31() & PEER_INT)) {
+		if (stream.initialized && (read_r31() & PEER_INT)) {
 			handle_peer_interrupt(&transport);
 		}
 	}

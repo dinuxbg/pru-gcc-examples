@@ -43,18 +43,27 @@ The host program simply gets data from the RPMSG device file and dumps it on its
 
 # Running The Example
 
+    # Build kernel module
+    sudo apt update
+    sudo apt install build-essential linux-headers-`uname -r`
+    cd driver
+    make
+    # Install kernel module
+    sudo cp beaglemic.ko /lib/modules/`uname -r`/kernel/drivers/rpmsg/
+    sudo depmod -a
+
+    # Load the driver
+    sudo modprobe beaglemic
+
     # Build PRU firmware
     cd pru
     make
     # Start the new PRU firmware
     sudo ./start.sh
-    # Build the host program
-    cd ../host
-    make
+
     # Record audio
-    sudo ./record >out.raw
+    arecord  -r32000  -c16 -f S16_LE -t wav out.wav
     # Hit Ctrl+C to stop.
-    sox -r 35511 -e signed -b 16 -c 16 -t raw out.raw out.wav
 
 
 # Further Work
