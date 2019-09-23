@@ -37,9 +37,9 @@ Unfortunately the breakout board is essential for a home DIY user like me, since
 # Software
 PRU0 takes care of driving the PDM bit clock and capturing the microphone bit data. It then runs a CIC filter to convert PDM to PCM, and feeds PCM data to PRU1.
 
-PRU1 is retransmitting PCM data from PRU0 down to the ARM host, using RPMSG.
+PRU1 is retransmitting PCM data from PRU0 down to the ARM host. RPMSG is used for control commands. Shared DDRAM buffers are used for audio data.
 
-The host program simply gets data from the RPMSG device file and dumps it on its ```stdout``` for further processing.
+Host audio driver presents a standard ALSA audio card, so that arecord and other standard tools can be readily used.
 
 # Running The Example
 
