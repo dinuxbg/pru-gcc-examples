@@ -38,9 +38,9 @@ static int aindex = SNDRV_DEFAULT_IDX1;  /* Index 0-MAX */
 static char *aid = SNDRV_DEFAULT_STR1;   /* ID for this card */
 
 module_param(aindex, int, 0444);
-MODULE_PARM_DESC(aindex, "Index value for SGI HAL2 soundcard.");
+MODULE_PARM_DESC(aindex, "Index value for soundcard.");
 module_param(aid, charp, 0444);
-MODULE_PARM_DESC(aid, "ID string for SGI HAL2 soundcard.");
+MODULE_PARM_DESC(aid, "ID string for soundcard.");
 
 struct instance_data {
 	struct rpmsg_device *rpdev;
