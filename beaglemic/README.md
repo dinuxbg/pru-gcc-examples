@@ -108,17 +108,22 @@ Host audio driver presents a standard ALSA audio card, so that arecord and other
     # Hit Ctrl+C to stop.
 
 
+# Folder Structure
+
+ * beaglemic-cape - Universal cape for BeagleBone AI, PocketBeagle and iCE40HX8K-EVB. Work in progress.
+ * driver - Host ALSA audio driver.
+ * inmp621-breakout - INMP621 Microphone breakout. Designed to be used with beaglemic-cape. Work in progress.
+ * libs - Library code. Currently contains code to drive LED ring for beaglemic-cape.
+ * pocket-cape - PocketBeagle cape to be used with spm0423hd4h-breakout.
+ * pru - PRU firmware.
+ * spm0423hd4h-breakout - SPM0432HD4H microphone breakout. Designed to be used with pocket-cape.
+
 # Further Work
 A few ideas to improve the design:
 
  * If input is limited to 8 microphones, then process and output 24bit PCM data.
  * Move comb filters to PRU1, and try to add more integrators in PRU0.
  * Clean-up the cape PCB.
-   * Design a cape with soldered mics. Current split design with wires is difficult to make.
-   * Add LEDs to show beamforming activity.
-   * Support both types of MICs (bottom and upper hole), as well as pin header.
-   * Leave the USB host connector for PocketBeagle.
-   * Support both BBAI and PB. How to accomodate BBAI fan?
    * If possible, leave headers for Class-D output from spare PRUs.
 
 # References
