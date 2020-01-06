@@ -1,7 +1,0 @@
-(sym_lib_table
-  (lib (name INMP621)(type Legacy)(uri ${KIPRJMOD}/INMP621.lib)(options "")(descr ""))
-  (lib (name Device)(type Legacy)(uri ${KICAD_SYMBOL_DIR}/Device.lib)(options "")(descr ""))
-  (lib (name Connector)(type Legacy)(uri ${KICAD_SYMBOL_DIR}/Connector.lib)(options "")(descr ""))
-  (lib (name Connector_Generic)(type Legacy)(uri ${KICAD_SYMBOL_DIR}/Connector_Generic.lib)(options "")(descr ""))
-  (lib (name inmp621-breakout-rescue)(type Legacy)(uri ${KIPRJMOD}/inmp621-breakout-rescue.lib)(options "")(descr ""))
-)

@@ -1,4 +1,0 @@
-(sym_lib_table
-  (lib (name INMP621)(type Legacy)(uri ${KIPRJMOD}/INMP621.lib)(options "")(descr ""))
-  (lib (name digital-mics)(type Legacy)(uri ${KIPRJMOD}/digital-mics.lib)(options "")(descr ""))
-)

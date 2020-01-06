@@ -1,4 +1,0 @@
-(fp_lib_table
-  (lib (name inmp621-footprint)(type KiCad)(uri ${KIPRJMOD}/inmp621-footprint)(options "")(descr ""))
-  (lib (name bga-6)(type KiCad)(uri ${KIPRJMOD}/bga-6.pretty)(options "")(descr ""))
-)
