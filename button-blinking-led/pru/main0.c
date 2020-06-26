@@ -41,16 +41,16 @@
  *
  *  The Button connection Diagram
  * 	3.3v-------___ ------------------|----------------------------^^^^------GND
- *              |                    |                              ^
- *                         			 |                              |
- *                                   |      			 		    |
- *            Button          connect wire from mark          	 1k Ohm
- *            not pressed     to P2.32						  	 resistance
+ *                  |                    |                              ^
+ *                         		 |                              |
+ *                                       |      		        |
+ *            Button          connect wire from mark          		 1k Ohm
+ *            not pressed     to P2.32					 resistance
  *
  *
  * When button is not pushed Pin P2.32 is connected to GND when button
  * is pressed there is voltage drop across resistance and 3.3V is applied to P2.32
- *
+ * Also see the fritzing diagram  in the README file for more clarity
  */
 
 #include <pru/io.h>
