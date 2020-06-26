@@ -3,7 +3,7 @@ This example is written to demonstrate how to use input and control output based
 
 ## Wiring the Button and LED
 
-![PocketArcade_bb](https://user-images.githubusercontent.com/6142587/85893431-27bf3600-b7f3-11ea-91e9-f82e7ed2346a.png)
+![Diagram](button-blinking-led/image/WiringDiagram.png)
 ## Firmware
 To build the PRU firmware:
 
