@@ -79,8 +79,8 @@ int main(void)
 	while(1) {
 		/*Check if  the Button is Pressed or not by reading the r31 and masking all other bits except 2nd bit   */
 		if(read_r31() &  BUTTON	) {
-			for(c=0;c<9;c++) {
-				/*Value of c 0000(0),00001(1), 0010(2),0011(3)....1001(9). LSB toggling between 0 and 1
+			for(c=0;c<8;c++) {
+				/*Value of c 0000(0),00001(1), 0010(2),0011(3)....1111(7). LSB toggling between 0 and 1
 				 *Thus  c & 1 evaluates to be true 4 times and false 4 times.
 				 *Accordingly bit 5 of r30 register is set and cleared.
 				 */
