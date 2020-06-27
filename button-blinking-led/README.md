@@ -18,9 +18,11 @@ Build and install firmware:
 
 	cd blinking-led/pru
 	make
-	sudo cp out/pru-core0.elf /lib/firmware/am335x-pru0-fw
-	sudo cp out/pru-core1.elf /lib/firmware/am335x-pru1-fw
-	sync
+	sudo bash
+	cp out/pru-core0.elf /lib/firmware/pru-core0.elf
+	echo stop /sys/class/remoteproc/remoteproc1/state
+	echo pru-core0.elf > /sys/class/remoteproc/remoteproc1/firmware
+	echo start /sys/class/remoteproc/remoteproc1/state
 
 In order to see the blinking led when you press the button you'll need to configure the pin mux:
 
@@ -36,6 +38,5 @@ or you can also use the following commands  to configure pin mux:
 change the pin numbers as per your usage
 
 ## Acknowledgements
- * Parts of the AM33xx PRU package have been used for the UIO blinking LED example loader: https://github.com/beagleboard/am335x_pru_package
  * Beagleboard.org test debian image has been used for running the blinking LED example: http://beagleboard.org/latest-images/
 

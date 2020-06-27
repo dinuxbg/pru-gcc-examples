@@ -44,11 +44,9 @@ CFLAGS += -minrt
 # Per-PRU core flags. The -mmcu option will select the correct linker
 # script and will predefine mcu-specific macros.
 CFLAGS0 += -mmcu=am335x.pru0
-CFLAGS1 += -mmcu=am335x.pru1
 
 # List of source files to compile for each PRU core.
 SRC0 := main0.c
-SRC1 := main0.c
 
 # GCC's -MMD does not yield the needed C dependencies when compiling all
 # C source files at once. So manually list headers here.
@@ -59,10 +57,9 @@ OUT := out
 
 # Final ELF image file names
 ELF0 := $(OUT)/pru-core0.elf
-ELF1 := $(OUT)/pru-core1.elf
 
 # ============================ DO NOT TOUCH BELOW ============================
-all: $(ELF0) $(ELF1)
+all: $(ELF0)
 	@echo Success: $^
 
 %.s : %.elf
@@ -86,11 +83,8 @@ $(OUT):
 $(ELF0): $(SRC0) $(HEADERS) | $(OUT)
 	$(CROSS_COMPILE)gcc $(CFLAGS) $(CFLAGS0) $(SRC0) $(LDFLAGS) -o $@
 
-$(ELF1): $(SRC0) $(HEADERS) | $(OUT)
-	$(CROSS_COMPILE)gcc $(CFLAGS) $(CFLAGS1) $(SRC1) $(LDFLAGS) -o $@
-
 clean:
-	$(RM) -fr $(ELF0) $(ELF1) $(OUT)  
+	$(RM) -fr $(ELF0) $(OUT)
 
 cscope:
 	cscope -bRk
