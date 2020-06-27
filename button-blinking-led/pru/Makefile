@@ -44,11 +44,11 @@ CFLAGS += -minrt
 # Per-PRU core flags. The -mmcu option will select the correct linker
 # script and will predefine mcu-specific macros.
 CFLAGS0 += -mmcu=am335x.pru0
-CFLAGS1 += -mmcu=am335x.pru1 -nostdlib -nodefaultlibs -nostartfiles
+CFLAGS1 += -mmcu=am335x.pru1
 
 # List of source files to compile for each PRU core.
 SRC0 := main0.c
-#SRC1 := main1.S
+SRC1 := main0.c
 
 # GCC's -MMD does not yield the needed C dependencies when compiling all
 # C source files at once. So manually list headers here.
@@ -86,11 +86,11 @@ $(OUT):
 $(ELF0): $(SRC0) $(HEADERS) | $(OUT)
 	$(CROSS_COMPILE)gcc $(CFLAGS) $(CFLAGS0) $(SRC0) $(LDFLAGS) -o $@
 
-$(ELF1): $(SRC1) $(HEADERS) | $(OUT)
+$(ELF1): $(SRC0) $(HEADERS) | $(OUT)
 	$(CROSS_COMPILE)gcc $(CFLAGS) $(CFLAGS1) $(SRC1) $(LDFLAGS) -o $@
 
 clean:
-	$(RM) -fr $(ELF0) $(ELF1) $(OUT)
+	$(RM) -fr $(ELF0) $(ELF1) $(OUT)  
 
 cscope:
 	cscope -bRk
