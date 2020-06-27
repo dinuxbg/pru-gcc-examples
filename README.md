@@ -12,6 +12,9 @@ Two host loader examples are provided - one for the old UIO mechanism, and one f
 ## blinking-led++
 Blinking led firmware written in C++.
 
+## button-blinking-led
+Button-controlled blinking LED. Shows both basic input and basic output.
+
 ## hc-sr04-range-sensor
 Remoteproc/rpmsg example for measuring distance using the HC-SR04 ultrasound range sensor.
 
