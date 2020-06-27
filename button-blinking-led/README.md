@@ -3,7 +3,7 @@ This example is written to demonstrate how to use input and control output based
 
 ## Wiring the Button and LED
 
-![Diagram](button-blinking-led/image/WiringDiagram.png)
+![Diagram](image/WiringDiagram.png)
 ## Firmware
 To build the PRU firmware:
 
