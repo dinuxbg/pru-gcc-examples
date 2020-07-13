@@ -16,7 +16,14 @@ Blinking led firmware written in C++.
 Button-controlled blinking LED. Shows both basic input and basic output.
 
 ## hc-sr04-range-sensor
-Remoteproc/rpmsg example for measuring distance using the HC-SR04 ultrasound range sensor.
+Remoteproc/rpmsg example for measuring distance using the HC-SR04 ultrasound range sensor.The rpmsg communication happens between PRU1 and ARM core.In order to perfrom communication between PRU0 and ARM core.</br>
+
+- Patch as following</br>
+	patch -s -p0 < hc-sr04-range-sensorPRU0.patch
+
+
+- To restore the changes made by patch</br>
+	patch -p0 -R -i hc-sr04-range-sensorPRU0.patch
 
 ## md5-check
 Calculate MD5 checksum for a known data chunk on both the ARM loader and one PRU core. Then UIO-based loader reads and compares the two checksums.
