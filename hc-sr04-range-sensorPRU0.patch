@@ -1,0 +1,554 @@
+diff -ruN hc-sr04-range-sensor/Makefile hc-sr04-range-sensorPRU0/Makefile
+--- hc-sr04-range-sensor/Makefile	2020-07-13 21:56:34.645509750 +0000
++++ hc-sr04-range-sensorPRU0/Makefile	2020-07-13 22:11:03.177390874 +0000
+@@ -47,8 +47,8 @@
+ CFLAGS1 += -mmcu=am335x.pru1
+ 
+ # List of source files to compile for each PRU core.
+-SRC0 := main0.c
+-SRC1 := main1.c hc-sr04.c pru_rpmsg.c pru_virtqueue.c
++SRC0 := main0.c hc-sr04.c pru_rpmsg.c pru_virtqueue.c
++SRC1 := main1.c 
+ 
+ # GCC's -MMD does not yield the needed C dependencies when compiling all
+ # C source files at once. So manually list headers here.
+@@ -58,8 +58,8 @@
+ OUT := out
+ 
+ # Final ELF image file names
+-ELF0 := $(OUT)/pru-halt.elf
+-ELF1 := $(OUT)/hc-sr04-range-sensor.elf
++ELF0 := $(OUT)/hc-sr04-range-sensor.elf
++ELF1 := $(OUT)/pru-halt.elf
+ 
+ # ============================ DO NOT TOUCH BELOW ============================
+ all: $(ELF0) $(ELF1)
+diff -ruN hc-sr04-range-sensor/README.md hc-sr04-range-sensorPRU0/README.md
+--- hc-sr04-range-sensor/README.md	2020-07-13 21:56:34.645509750 +0000
++++ hc-sr04-range-sensorPRU0/README.md	2020-07-13 22:13:18.326365942 +0000
+@@ -28,16 +28,16 @@
+ 
+ 	cd hc-sr04-range-sensor
+ 	make
+-	sudo cp out/pru-halt.elf /lib/firmware/am335x-pru0-fw
+-	sudo cp out/hc-sr04-range-sensor.elf /lib/firmware/am335x-pru1-fw
++	sudo cp out/hc-sr04-range-sensor.elf /lib/firmware/am335x-pru0-fw
++	sudo cp out/pru-halt.elf /lib/firmware/am335x-pru1-fw
+ 	sync
+ 	reboot # Needed to load the firmware
+ 
+ To see the range measurement result in millimeters:
+ 
+ 	sudo bash
+-	echo hello > /dev/rpmsg_pru31
+-	cat /dev/rpmsg_pru31   # Press Ctrl+C to exit
++	echo hello > /dev/rpmsg_pru30
++	cat /dev/rpmsg_pru30   # Press Ctrl+C to exit
+ 
+ ## Acknowledgements
+  * Sensor idea and DTS from https://github.com/HudsonWerks/Range-Sensor-PRU
+diff -ruN hc-sr04-range-sensor/main0.c hc-sr04-range-sensorPRU0/main0.c
+--- hc-sr04-range-sensor/main0.c	2020-07-13 21:56:34.661509750 +0000
++++ hc-sr04-range-sensorPRU0/main0.c	2020-07-13 22:09:27.023510932 +0000
+@@ -26,12 +26,119 @@
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE. */
+ 
+-#include <pru/io.h>
+ 
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <pru_cfg.h>
++#include <pru_intc.h>
++#include <rsc_types.h>
++#include <pru_virtqueue.h>
++#include <pru_rpmsg.h>
+ #include "resource_table_0.h"
+ 
++#include <pru/io.h>
++
++#include "hc-sr04.h"
++
++/* Host-0 Interrupt sets bit 30 in register R31 */
++#define HOST_INT			((uint32_t) 1 << 30)
++
++/* The PRU-ICSS system events used for RPMsg are defined in the Linux device tree
++ * PRU0 uses system event 16 (To ARM) and 17 (From ARM)
++ * PRU1 uses system event 18 (To ARM) and 19 (From ARM)
++ */
++#define TO_ARM_HOST			16
++#define FROM_ARM_HOST			17
++#define CHAN_NAME					"rpmsg-pru"
++#define CHAN_DESC					"Channel 30"
++#define CHAN_PORT					30
++
++/*
++ * Used to make sure the Linux drivers are ready for RPMsg communication
++ * Found at linux-x.y.z/include/uapi/linux/virtio_config.h
++ */
++#define VIRTIO_CONFIG_S_DRIVER_OK	4
++
++char payload[RPMSG_BUF_SIZE];
++
++static int measure_distance_mm(void)
++{
++	int t_us = hc_sr04_measure_pulse();
++	int d_mm;
++
++	/*
++	 * Print the distance received from the sonar
++	 * At 20 degrees in dry air the speed of sound is 3422 mm/sec
++	 * so it takes 2.912 us to make 1 mm, i.e. 5.844 us for a
++	 * roundtrip of 1 mm.
++	 */
++	d_mm = (t_us * 1000) / 5844;
++	if (t_us < 0)
++		d_mm = -1;
++
++	return d_mm;
++}
++
++static void handle_mailbox_interrupt(struct pru_rpmsg_transport *transport)
++{
++	uint16_t src, dst, len;
++
++	/* Clear the event status */
++	CT_INTC.SICR_bit.STS_CLR_IDX = FROM_ARM_HOST;
++
++	/* Receive all available messages, multiple messages can be sent per kick */
++	while (pru_rpmsg_receive(transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
++		/* Echo the message back to the same address
++		 * from which we just received */
++		int d_mm = measure_distance_mm();
++
++		/* there is no room in IRAM for iprintf */
++		itoa(d_mm, payload, 10);
++
++		pru_rpmsg_send(transport, dst, src,
++			       payload, strlen(payload) + 1);
++	}
++}
++
+ int main(void)
+ {
+-	__halt();
++	struct pru_rpmsg_transport transport;
++	volatile uint8_t *status;
++
++	/* allow OCP master port access by the PRU so the PRU
++	 * can read external memories */
++	CT_CFG.SYSCFG_bit.STANDBY_INIT = 0;
++
++	/* clear the status of the PRU-ICSS system event that the ARM will use to 'kick' us */
++	CT_INTC.SICR_bit.STS_CLR_IDX = FROM_ARM_HOST;
++
++	/* Make sure the Linux drivers are ready for RPMsg communication */
++	status = &resourceTable.rpmsg_vdev.status;
++	while (!(*status & VIRTIO_CONFIG_S_DRIVER_OK))
++		;
++
++	/* Initialize the RPMsg transport structure */
++	pru_rpmsg_init(&transport,
++		       &resourceTable.rpmsg_vring0,
++		       &resourceTable.rpmsg_vring1,
++		       TO_ARM_HOST,
++		       FROM_ARM_HOST);
++
++	/* Create the RPMsg channel between the PRU and ARM user space using the transport structure. */
++	while (pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, CHAN_NAME, CHAN_DESC, CHAN_PORT) != PRU_RPMSG_SUCCESS)
++		;
++
++	hc_sr04_init();
++
++	while (1) {
++		/* Check bit 31 of register R31 to see
++		 * if the mailbox interrupt has occurred */
++		if (read_r31() & HOST_INT) {
++			handle_mailbox_interrupt(&transport);
++		}
++	}
++
+ 	return 0;
+ }
+diff -ruN hc-sr04-range-sensor/main1.c hc-sr04-range-sensorPRU0/main1.c
+--- hc-sr04-range-sensor/main1.c	2020-07-13 21:56:34.665509750 +0000
++++ hc-sr04-range-sensorPRU0/main1.c	2020-07-13 22:03:37.258483355 +0000
+@@ -34,121 +34,12 @@
+  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-#include <stdint.h>
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <string.h>
+-#include <pru_cfg.h>
+-#include <pru_intc.h>
+-#include <rsc_types.h>
+-#include <pru_virtqueue.h>
+-#include <pru_rpmsg.h>
+-#include "resource_table_1.h"
+-
+ #include <pru/io.h>
+ 
+-#include "hc-sr04.h"
+-
+-/* Host-1 Interrupt sets bit 31 in register R31 */
+-#define HOST_INT			((uint32_t) 1 << 31)	
+-
+-/* The PRU-ICSS system events used for RPMsg are defined in the Linux device tree
+- * PRU0 uses system event 16 (To ARM) and 17 (From ARM)
+- * PRU1 uses system event 18 (To ARM) and 19 (From ARM)
+- */
+-#define TO_ARM_HOST			18	
+-#define FROM_ARM_HOST			19
+-
+-
+-#define CHAN_NAME					"rpmsg-pru"
+-
+-#define CHAN_DESC					"Channel 31"
+-#define CHAN_PORT					31
+-
+-/*
+- * Used to make sure the Linux drivers are ready for RPMsg communication
+- * Found at linux-x.y.z/include/uapi/linux/virtio_config.h
+- */
+-#define VIRTIO_CONFIG_S_DRIVER_OK	4
+-
+-char payload[RPMSG_BUF_SIZE];
+-
+-static int measure_distance_mm(void)
+-{
+-	int t_us = hc_sr04_measure_pulse();
+-	int d_mm;
+-
+-	/*
+-	 * Print the distance received from the sonar
+-	 * At 20 degrees in dry air the speed of sound is 3422 mm/sec
+-	 * so it takes 2.912 us to make 1 mm, i.e. 5.844 us for a
+-	 * roundtrip of 1 mm.
+-	 */
+-	d_mm = (t_us * 1000) / 5844;
+-	if (t_us < 0)
+-		d_mm = -1;
+-
+-	return d_mm;
+-}
+-
+-static void handle_mailbox_interrupt(struct pru_rpmsg_transport *transport)
+-{
+-	uint16_t src, dst, len;
+-
+-	/* Clear the event status */
+-	CT_INTC.SICR_bit.STS_CLR_IDX = FROM_ARM_HOST;
+-
+-	/* Receive all available messages, multiple messages can be sent per kick */
+-	while (pru_rpmsg_receive(transport, &src, &dst, payload, &len) == PRU_RPMSG_SUCCESS) {
+-		/* Echo the message back to the same address
+-		 * from which we just received */
+-		int d_mm = measure_distance_mm();
+-
+-		/* there is no room in IRAM for iprintf */
+-		itoa(d_mm, payload, 10);
+-
+-		pru_rpmsg_send(transport, dst, src,
+-			       payload, strlen(payload) + 1);
+-	}
+-}
++#include "resource_table_1.h"
+ 
+ int main(void)
+ {
+-	struct pru_rpmsg_transport transport;
+-	volatile uint8_t *status;
+-
+-	/* allow OCP master port access by the PRU so the PRU
+-	 * can read external memories */
+-	CT_CFG.SYSCFG_bit.STANDBY_INIT = 0;
+-
+-	/* clear the status of the PRU-ICSS system event that the ARM will use to 'kick' us */
+-	CT_INTC.SICR_bit.STS_CLR_IDX = FROM_ARM_HOST;
+-
+-	/* Make sure the Linux drivers are ready for RPMsg communication */
+-	status = &resourceTable.rpmsg_vdev.status;
+-	while (!(*status & VIRTIO_CONFIG_S_DRIVER_OK))
+-		;
+-
+-	/* Initialize the RPMsg transport structure */
+-	pru_rpmsg_init(&transport,
+-		       &resourceTable.rpmsg_vring0,
+-		       &resourceTable.rpmsg_vring1,
+-		       TO_ARM_HOST,
+-		       FROM_ARM_HOST);
+-
+-	/* Create the RPMsg channel between the PRU and ARM user space using the transport structure. */
+-	while (pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, CHAN_NAME, CHAN_DESC, CHAN_PORT) != PRU_RPMSG_SUCCESS)
+-		;
+-
+-	hc_sr04_init();
+-
+-	while (1) {
+-		/* Check bit 31 of register R31 to see
+-		 * if the mailbox interrupt has occurred */
+-		if (read_r31() & HOST_INT) {
+-			handle_mailbox_interrupt(&transport);
+-		}
+-	}
+-
++	__halt();
+ 	return 0;
+ }
+Binary files hc-sr04-range-sensor/out/hc-sr04-range-sensor.elf and hc-sr04-range-sensorPRU0/out/hc-sr04-range-sensor.elf differ
+Binary files hc-sr04-range-sensor/out/pru-halt.elf and hc-sr04-range-sensorPRU0/out/pru-halt.elf differ
+diff -ruN hc-sr04-range-sensor/resource_table_0.h hc-sr04-range-sensorPRU0/resource_table_0.h
+--- hc-sr04-range-sensor/resource_table_0.h	2020-07-13 21:56:34.665509750 +0000
++++ hc-sr04-range-sensorPRU0/resource_table_0.h	2020-07-13 22:05:11.340630385 +0000
+@@ -47,26 +47,113 @@
+ #include <rsc_types.h>
+ #include "pru_virtio_ids.h"
+ 
++/*
++ * Sizes of the virtqueues (expressed in number of buffers supported,
++ * and must be power of 2)
++ */
++#define PRU_RPMSG_VQ0_SIZE	16
++#define PRU_RPMSG_VQ1_SIZE	16
++
++/*
++ * The feature bitmap for virtio rpmsg
++ */
++#define VIRTIO_RPMSG_F_NS	0		//name service notifications
++
++/* This firmware supports name service notifications as one of its features */
++#define RPMSG_PRU_C0_FEATURES	(1 << VIRTIO_RPMSG_F_NS)
++
++/* Definition for unused interrupts */
++#define HOST_UNUSED		255
++
++/* Mapping sysevts to a channel. Each pair contains a sysevt, channel. */
++struct ch_map pru_intc_map[] = { {16, 2},
++				 {17, 0},
++};
++
+ struct my_resource_table {
+ 	struct resource_table base;
+ 
+-	uint32_t offset[1]; /* Should match 'num' in actual definition */
++	uint32_t offset[2]; /* Should match 'num' in actual definition */
++
++	/* rpmsg vdev entry */
++	struct fw_rsc_vdev rpmsg_vdev;
++	struct fw_rsc_vdev_vring rpmsg_vring0;
++	struct fw_rsc_vdev_vring rpmsg_vring1;
++
++	/* intc definition */
++	struct fw_rsc_custom pru_ints;
+ };
+ 
+ #if !defined(__GNUC__)
+-  #pragma DATA_SECTION(am335x_pru_remoteproc_ResourceTable, ".resource_table")
+-  #pragma RETAIN(am335x_pru_remoteproc_ResourceTable)
+-  #define __resource_table	/* */
++  #pragma DATA_SECTION(resourceTable, ".resource_table")
++  #pragma RETAIN(resourceTable)
++  #define __resource_table      /* */
+ #else
+   #define __resource_table __attribute__((section(".resource_table")))
+ #endif
+-struct my_resource_table am335x_pru_remoteproc_ResourceTable __resource_table = {
++
++struct my_resource_table resourceTable __resource_table = {
++	{
++		1,              /* Resource table version: only version 1 is supported by the current driver */
++		2,              /* number of entries in the table */
++		{ 0, 0 },       /* reserved, must be zero */
++	},
++	/* offsets to entries */
++	{
++		offsetof(struct my_resource_table, rpmsg_vdev),
++		offsetof(struct my_resource_table, pru_ints),
++	},
++
++	/* rpmsg vdev entry */
++	{
++		(uint32_t)TYPE_VDEV, 			//type
++		(uint32_t)VIRTIO_ID_RPMSG, 		//id
++		(uint32_t)0,				//notifyid
++		(uint32_t)RPMSG_PRU_C0_FEATURES, 	//dfeatures
++		(uint32_t)0, 				//gfeatures
++		(uint32_t)0, 				//config_len
++		(uint8_t)0, 				//status
++		(uint8_t)2, 				//num_of_vrings, only two is supported
++		{(uint8_t)0, (uint8_t)0 },		//reserved
++		/* no config data */
++	},
++	/* the two vrings */
++	{
++		0,					//da, will be populated by host, can't pass it in
++		16,					//align (bytes),
++		PRU_RPMSG_VQ0_SIZE,			//num of descriptors
++		0,					//notifyid, will be populated, can't pass right now
++		0					//reserved
++	},
++	{
++		0, 					//da, will be populated by host, can't pass it in
++		16, 					//align (bytes),
++		PRU_RPMSG_VQ1_SIZE, 			//num of descriptors
++		0, 					//notifyid, will be populated, can't pass right now
++		0 					//reserved
++	},
++
+ 	{
+-		1,		/* we're the first version that implements this */
+-		0,		/* number of entries in the table */
+-		{ 0, 0 },	/* reserved, must be zero */
++		TYPE_CUSTOM, TYPE_PRU_INTS,
++		sizeof(struct fw_rsc_custom_ints),
++		{ /* PRU_INTS version */
++			{
++				0x0000,
++				/* Channel-to-host mapping, 255 for unused
++				 * 		Mapping Channel-1 to Host-1 (PRU0/1 R31 bit 31)
++				 * */
++				{
++					//HOST_UNUSED, 1, HOST_UNUSED, 3, HOST_UNUSED,
++						 0, HOST_UNUSED, 2, HOST_UNUSED, HOST_UNUSED,
++					HOST_UNUSED, HOST_UNUSED, HOST_UNUSED, HOST_UNUSED, HOST_UNUSED
++				},
++				/* Number of evts being mapped to channels */
++				(sizeof(pru_intc_map) / sizeof(struct ch_map)),
++				/* Pointer to the structure containing mapped events */
++				pru_intc_map,
++			},
++		},
+ 	},
+-	{ 0 },
+ };
+ 
+ #endif /* _RSC_TABLE_PRU_H_ */
+diff -ruN hc-sr04-range-sensor/resource_table_1.h hc-sr04-range-sensorPRU0/resource_table_1.h
+--- hc-sr04-range-sensor/resource_table_1.h	2020-07-13 21:56:34.665509750 +0000
++++ hc-sr04-range-sensorPRU0/resource_table_1.h	2020-07-13 22:05:56.503837579 +0000
+@@ -38,112 +38,26 @@
+ #include <rsc_types.h>
+ #include "pru_virtio_ids.h"
+ 
+-/*
+- * Sizes of the virtqueues (expressed in number of buffers supported,
+- * and must be power of 2)
+- */
+-#define PRU_RPMSG_VQ0_SIZE	16
+-#define PRU_RPMSG_VQ1_SIZE	16
+-
+-/*
+- * The feature bitmap for virtio rpmsg
+- */
+-#define VIRTIO_RPMSG_F_NS	0		//name service notifications
+-
+-/* This firmware supports name service notifications as one of its features */
+-#define RPMSG_PRU_C0_FEATURES	(1 << VIRTIO_RPMSG_F_NS)
+-
+-/* Definition for unused interrupts */
+-#define HOST_UNUSED		255
+-
+-/* Mapping sysevts to a channel. Each pair contains a sysevt, channel. */
+-struct ch_map pru_intc_map[] = { {18, 3},
+-				 {19, 1},
+-};
+-
+ struct my_resource_table {
+ 	struct resource_table base;
+ 
+-	uint32_t offset[2]; /* Should match 'num' in actual definition */
+-
+-	/* rpmsg vdev entry */
+-	struct fw_rsc_vdev rpmsg_vdev;
+-	struct fw_rsc_vdev_vring rpmsg_vring0;
+-	struct fw_rsc_vdev_vring rpmsg_vring1;
+-
+-	/* intc definition */
+-	struct fw_rsc_custom pru_ints;
++	uint32_t offset[1]; /* Should match 'num' in actual definition */
+ };
+ 
+ #if !defined(__GNUC__)
+-  #pragma DATA_SECTION(resourceTable, ".resource_table")
+-  #pragma RETAIN(resourceTable)
+-  #define __resource_table      /* */
++  #pragma DATA_SECTION(am335x_pru_remoteproc_ResourceTable, ".resource_table")
++  #pragma RETAIN(am335x_pru_remoteproc_ResourceTable)
++  #define __resource_table	/* */
+ #else
+   #define __resource_table __attribute__((section(".resource_table")))
+ #endif
+-
+-struct my_resource_table resourceTable __resource_table = {
+-	{
+-		1,              /* Resource table version: only version 1 is supported by the current driver */
+-		2,              /* number of entries in the table */
+-		{ 0, 0 },       /* reserved, must be zero */
+-	},
+-	/* offsets to entries */
+-	{
+-		offsetof(struct my_resource_table, rpmsg_vdev),
+-		offsetof(struct my_resource_table, pru_ints),
+-	},
+-
+-	/* rpmsg vdev entry */
+-	{
+-		(uint32_t)TYPE_VDEV, 			//type
+-		(uint32_t)VIRTIO_ID_RPMSG, 		//id
+-		(uint32_t)0,				//notifyid
+-		(uint32_t)RPMSG_PRU_C0_FEATURES, 	//dfeatures
+-		(uint32_t)0, 				//gfeatures
+-		(uint32_t)0, 				//config_len
+-		(uint8_t)0, 				//status
+-		(uint8_t)2, 				//num_of_vrings, only two is supported
+-		{(uint8_t)0, (uint8_t)0 },		//reserved
+-		/* no config data */
+-	},
+-	/* the two vrings */
+-	{
+-		0,					//da, will be populated by host, can't pass it in
+-		16,					//align (bytes),
+-		PRU_RPMSG_VQ0_SIZE,			//num of descriptors
+-		0,					//notifyid, will be populated, can't pass right now
+-		0					//reserved
+-	},
+-	{
+-		0, 					//da, will be populated by host, can't pass it in
+-		16, 					//align (bytes),
+-		PRU_RPMSG_VQ1_SIZE, 			//num of descriptors
+-		0, 					//notifyid, will be populated, can't pass right now
+-		0 					//reserved
+-	},
+-
++struct my_resource_table am335x_pru_remoteproc_ResourceTable __resource_table = {
+ 	{
+-		TYPE_CUSTOM, TYPE_PRU_INTS,
+-		sizeof(struct fw_rsc_custom_ints),
+-		{ /* PRU_INTS version */
+-			{
+-				0x0000,
+-				/* Channel-to-host mapping, 255 for unused
+-				 * 		Mapping Channel-1 to Host-1 (PRU0/1 R31 bit 31)
+-				 * */
+-				{
+-					HOST_UNUSED, 1, HOST_UNUSED, 3, HOST_UNUSED,
+-					HOST_UNUSED, HOST_UNUSED, HOST_UNUSED, HOST_UNUSED, HOST_UNUSED
+-				},
+-				/* Number of evts being mapped to channels */
+-				(sizeof(pru_intc_map) / sizeof(struct ch_map)),
+-				/* Pointer to the structure containing mapped events */
+-				pru_intc_map,
+-			},
+-		},
++		1,		/* we're the first version that implements this */
++		0,		/* number of entries in the table */
++		{ 0, 0 },	/* reserved, must be zero */
+ 	},
++	{ 0 },
+ };
+ 
+ #endif /* _RSC_TABLE_PRU_H_ */
