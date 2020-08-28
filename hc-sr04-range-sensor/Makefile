@@ -1,4 +1,7 @@
-# Copyright (c) 2015, Dimitar Dimitrov
+#
+#Copyright (c) 2015, Dimitar Dimitrov
+#Copyright (c) 2020, Modified by Deepankar Maithani to add install, start,stop 
+#targets for PRU0 and PRU1 on ARM architecture
 #   All rights reserved.
 #
 #   Redistribution and use in source and binary forms, with or without
@@ -28,7 +31,7 @@
 
 # Very simple makefile to cross-compile for PRU
 
-
+#!/bin/bash
 # Common flags
 CROSS_COMPILE ?= pru-
 CFLAGS += -g -Os
@@ -61,6 +64,18 @@ OUT := out
 ELF0 := $(OUT)/pru-halt.elf
 ELF1 := $(OUT)/hc-sr04-range-sensor.elf
 
+#Installation, start stop related variable
+ARCHT   :=$(shell uname -m)
+ARM :=armv7l
+ifeq ($(ARCHT),$(ARM))
+	RPROC_PRU0        :=/sys/class/remoteproc/remoteproc1
+	RPROC_PRU1        :=/sys/class/remoteproc/remoteproc2
+	STATESRUNNING   :=running
+	STATESSTOPED   :=offline
+	CURRENTSTATE0:=$(shell cat $(RPROC_PRU0)/state)
+	CURRENTSTATE1:=$(shell cat $(RPROC_PRU1)/state)
+endif
+	
 # ============================ DO NOT TOUCH BELOW ============================
 all: $(ELF0) $(ELF1)
 	@echo Success: $^
@@ -92,6 +107,98 @@ $(ELF1): $(SRC1) $(HEADERS) | $(OUT)
 clean:
 	$(RM) -fr $(ELF0) $(ELF1) $(OUT)
 
+stop_pru0:
+	@if [ $(ARCHT) = $(ARM) ]; then\
+		if [ $(CURRENTSTATE0) = $(STATESRUNNING) ]; then\
+		echo "Stoping PRU0 ";\
+		echo stop >$(RPROC_PRU0)/state ;\
+		echo "PRU stopped ";\
+		else\
+		echo "PRU0 is already Halted";\
+		fi \
+		else\
+		echo "Architecture doesnot support functionality. Run on Beaglebone";\
+	fi \
+
+start_pru0:
+	@if [ $(ARCHT) = $(ARM) ]; then\
+		if [ $(CURRENTSTATE0) = $(STATESSTOPED) ]; then\
+		echo "Starting PRU0 ";\
+		echo start >$(RPROC_PRU0)/state ;\
+		echo "PRU0 started ";\
+		else\
+		echo "PRU0 is already running";\
+		fi \
+		else\
+		echo "Architecture doesnot support functionality. Run on Beaglebone";\
+	fi \
+
+install_pru0:
+	@if [ $(ARCHT) = $(ARM) ]; then\
+		echo "Architecture supports install";\
+		if [ $(CURRENTSTATE0) = $(STATESRUNNING) ]; then\
+		echo "Stoping PRU0 ";\
+		echo stop >$(RPROC_PRU0)/state ;\
+		echo "loading new firmware ";\
+		sudo sudo cp $(ELF0) /lib/firmware/am335x-pru0-fw;\
+		echo start>$(RPROC_PRU0)/state;\
+		echo "PRU0 started with new firmware ";\
+		else\
+		echo "loading new firmware";\
+		sudo sudo cp $(ELF0) /lib/firmware/am335x-pru0-fw;\
+		echo start>$(RPROC_PRU0)/state;\
+		echo "PRU0 started with new firmware ";\
+		fi \
+		else\
+		echo "Architecture doesnot support functionality. Run on Beaglebone";\
+	fi \
+
+stop_pru1:
+	@if [ $(ARCHT) = $(ARM) ]; then\
+		if [ $(CURRENTSTATE1) = $(STATESRUNNING) ]; then\
+		echo "Stoping PRU1 ";\
+		echo stop >$(RPROC_PRU1)/state ;\
+		echo "PRU stopped ";\
+		else\
+		echo "PRU1 is already Halted";\
+		fi \
+		else\
+		echo "Architecture doesnot support functionality. Run on Beaglebone";\
+	fi \
+
+start_pru1:
+	@if [ $(ARCHT) = $(ARM) ]; then\
+		if [ $(CURRENTSTATE1) = $(STATESSTOPED) ]; then\
+		echo "Starting PRU1 ";\
+		echo start >$(RPROC_PRU1)/state ;\
+		echo "PRU1 started ";\
+		else\
+		echo "PRU1 is already running";\
+		fi \
+		else\
+		echo "Architecture doesnot support functionality. Run on Beaglebone";\
+	fi \
+
+install_pru1:
+	@if [ $(ARCHT) = $(ARM) ]; then\
+		echo "Architecture supports install";\
+		if [ $(CURRENTSTATE1) = $(STATESRUNNING) ]; then\
+		echo "Stoping PRU1 ";\
+		echo stop >$(RPROC_PRU1)/state ;\
+		echo "loading new firmware ";\
+		sudo sudo cp $(ELF1) /lib/firmware/am335x-pru1-fw;\
+		echo start>$(RPROC_PRU1)/state;\
+		echo "PRU started with new firmware ";\
+		else\
+		echo "loading new firmware";\
+		sudo sudo cp $(ELF1) /lib/firmware/am335x-pru1-fw;\
+		echo start>$(RPROC_PRU1)/state;\
+		echo "PRU1 started with new firmware ";\
+		fi \
+		else\
+		echo "Architecture doesnot support functionality. Run on Beaglebone";\
+	fi \
+	
 cscope:
 	cscope -bRk
 
