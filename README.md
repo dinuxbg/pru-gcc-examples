@@ -1,4 +1,4 @@
-# Example projects for the unofficial PRU-GCC port
+# Example projects for the GNU PRU toolchain
 
 The pru-gcc toolchain source and build instructions are located at https://github.com/dinuxbg/gnupru .
 
