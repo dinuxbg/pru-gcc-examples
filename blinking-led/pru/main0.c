@@ -37,13 +37,31 @@ static void delay_us(unsigned int us)
 }
 
 const unsigned int period_us = 250 * 1000;
+#define GPIO1_BASE		0x4804C000
+
+#define GPIO1_OE		(*(volatile uint32_t *)(GPIO1_BASE + 0x134))
+#define GPIO1_DATAIN		(*(volatile uint32_t *)(GPIO1_BASE + 0x138))
+#define GPIO1_CLEARDATAOUT	(*(volatile uint32_t *)(GPIO1_BASE + 0x190))
+#define GPIO1_SETDATAOUT	(*(volatile uint32_t *)(GPIO1_BASE + 0x194))
+#define TRIG_BIT	24
 
 int main(void)
 {
 	unsigned int c;
 
+	/* allow OCP master port access by the PRU so the PRU
+	 * can read external memories */
+	//CT_CFG.SYSCFG_bit.STANDBY_INIT = 0;
+	PRU_CFG.SYSCFG_bit.STANDBY_INIT = 0;
+
+	GPIO1_OE &= ~(1u << TRIG_BIT);	/* output */
 	for (c = 0; ; c++) {
 		write_r30(c & 1 ? 0xffff : 0x0000);
+		if (c & 1)
+			GPIO1_SETDATAOUT = 1u << TRIG_BIT;
+		else
+			GPIO1_CLEARDATAOUT = 1u << TRIG_BIT;
+
 		delay_us (period_us);
 	}
 
