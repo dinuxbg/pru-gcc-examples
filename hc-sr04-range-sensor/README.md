@@ -28,16 +28,36 @@ Build and install firmware:
 
 	cd hc-sr04-range-sensor
 	make
-	sudo cp out/pru-halt.elf /lib/firmware/am335x-pru0-fw
-	sudo cp out/hc-sr04-range-sensor.elf /lib/firmware/am335x-pru1-fw
-	sync
-	reboot # Needed to load the firmware
+	make install_pru0
+	make install_pru1
+
 
 To see the range measurement result in millimeters:
 
 	sudo bash
 	echo hello > /dev/rpmsg_pru31
 	cat /dev/rpmsg_pru31   # Press Ctrl+C to exit
+	
+
+Other fuctionalities in  Makefile:
+	
+- In order to stop the PRU 0
+	
+	make stop_pru0
+	
+- In order to stop the  PRU 1
+
+	make stop_pru1
+	
+- In order to start the PRU 0
+	
+	make start_pru0
+	
+- In order to start the PRU 1
+	
+	make start_pru1
+
+
 
 ## Acknowledgements
  * Sensor idea and DTS from https://github.com/HudsonWerks/Range-Sensor-PRU
