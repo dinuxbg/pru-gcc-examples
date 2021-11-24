@@ -12,8 +12,6 @@ To build the PRU firmware:
 
 ## Remoteproc host driver
 
-First setup remoteproc driver by following [../REMOTEPROC.md](../REMOTEPROC.md).
-
 Build and install firmware:
 
 	cd blinking-led/pru

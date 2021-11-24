@@ -22,22 +22,28 @@ There is a good explanation in https://github.com/HudsonWerks/Range-Sensor-PRU, 
 
 ## Building and running the example
 
-First setup remoteproc driver by following [../REMOTEPROC.md](../REMOTEPROC.md).
-
 Build and install firmware:
 
 	cd hc-sr04-range-sensor
 	make
-	sudo cp out/pru-halt.elf /lib/firmware/am335x-pru0-fw
-	sudo cp out/hc-sr04-range-sensor.elf /lib/firmware/am335x-pru1-fw
-	sync
-	reboot # Needed to load the firmware
+	sudo bash
+	cp out/pru-halt.elf /lib/firmware/
+	cp out/hc-sr04-range-sensor.elf /lib/firmware/
+
+	echo pru-halt.elf > /sys/class/remoteproc/remoteproc1/firmware
+	echo hc-sr04-range-sensor.elf > /sys/class/remoteproc/remoteproc2/firmware
+	echo start > /sys/class/remoteproc/remoteproc1/state
+	echo start > /sys/class/remoteproc/remoteproc2/state
 
 To see the range measurement result in millimeters:
 
 	sudo bash
 	echo hello > /dev/rpmsg_pru31
 	cat /dev/rpmsg_pru31   # Press Ctrl+C to exit
+
+Or, alternatively, as a one-liner in BASH:
+
+	echo s >/dev/rpmsg_pru31; dd if=/dev/rpmsg_pru31 bs=32 count=1 2>/dev/null; echo
 
 ## Acknowledgements
  * Sensor idea and DTS from https://github.com/HudsonWerks/Range-Sensor-PRU

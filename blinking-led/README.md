@@ -16,8 +16,6 @@ There is a nice automated script to configure [the latest Beaglebone Debian imag
 
 ## Remoteproc host driver
 
-First setup remoteproc driver by following [../REMOTEPROC.md](../REMOTEPROC.md).
-
 Build and install firmware:
 
 	cd blinking-led/pru
