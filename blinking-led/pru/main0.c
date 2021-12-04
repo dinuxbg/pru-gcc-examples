@@ -41,7 +41,7 @@ int main(void)
 	unsigned int c;
 
 	for (c = 0; ; c++) {
-		write_r30(c & 1 ? 0xffff : 0x0000);
+		__R30 = c & 1 ? 0xffff : 0x0000;
 		delay_us (period_us);
 	}
 

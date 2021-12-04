@@ -50,7 +50,7 @@ int main(void)
 	MD5_Final(md5res, &md5ctx);
 
 	for (c = 0; ; c++) {
-		write_r30(c & 1 ? 0xffff : 0x0000);
+		__R30 = c & 1 ? 0xffff : 0x0000;
 		delay_us (1000 * 1000);
 	}
 

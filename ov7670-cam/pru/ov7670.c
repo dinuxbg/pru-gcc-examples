@@ -99,8 +99,8 @@ unsigned long ov7670_init(unsigned long xclk_rate_hz)
 	PRU_CFG.GPCFG_bit.GPO_DIV1 = best_div1;
 
 	/* Start shifting */
-	write_r30((1u << 29) | 0xaaaa);
-	write_r30(1u << 31);
+	__R30 = (1u << 29) | 0xaaaa;
+	__R30 = 1u << 31;
 
 	return best_rate;
 }
@@ -112,12 +112,12 @@ unsigned long ov7670_init(unsigned long xclk_rate_hz)
 static inline uint32_t read_clocked_rawbyte(void)
 {
 	/* wait for LOW PCLK */
-	while (read_r31() & (1u << PCLK_BIT));
+	while (__R31 & (1u << PCLK_BIT));
 
 	/* wait for HIGH PCLK */
-	while (!(read_r31() & (1u << PCLK_BIT)));
+	while (!(__R31 & (1u << PCLK_BIT)));
 
-	return read_r31();
+	return __R31;
 }
 
 uint32_t num_frames;
