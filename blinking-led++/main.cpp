@@ -30,8 +30,6 @@
 
 #include <pru/io.h>
 
-#include "resource_table_0.h"
-
 static void delay_us(unsigned int us)
 {
 	/* assume cpu frequency is 200MHz */

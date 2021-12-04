@@ -56,8 +56,6 @@
 #include <pru/io.h>
 #include <stdint.h>
 
-#include "resource_table_0.h"
-
 #define LED ((uint32_t) 1 << 5)
 #define BUTTON			((uint32_t) 1 << 2)
 

@@ -45,11 +45,3 @@ delay_n2_cycles:
 	sub	r14, r14, 1
 	qbne	delay_n2_cycles, r14, 0
 	ret
-
-
-	/* Dummy data, required by remoteproc loader */
-	.data
-	.section .resource_table,"aw",@progbits
-my_resource_table:
-	.word	1, 0, 0, 0	/* struct resource_table base */
-	.word	0		/* uint32_t offset[1] */
