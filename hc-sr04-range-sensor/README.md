@@ -4,6 +4,8 @@ This is yet another HC-SR04 range sensor example for PRU. In an attempt to diffe
 
 To understand the rpmsg code here please visit http://processors.wiki.ti.com/index.php/PRU_Training:_Hands-on_Labs
 
+:warning: **WARNING**: This version requires remoteproc driver from Linux kernel version 5.10 or later, as well as RPMSG driver for PRU. For earlier kernels, please check the other branches of this project.
+
 ## Wiring the sensor
 There is a good explanation in https://github.com/HudsonWerks/Range-Sensor-PRU, so I'll just quote it:
 
