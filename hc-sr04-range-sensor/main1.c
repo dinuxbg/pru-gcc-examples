@@ -87,8 +87,8 @@ static int measure_distance_mm(void)
 
 	/*
 	 * Print the distance received from the sonar
-	 * At 20 degrees in dry air the speed of sound is 3422 mm/sec
-	 * so it takes 2.912 us to make 1 mm, i.e. 5.844 us for a
+	 * At 20 degrees in dry air the speed of sound is 342 m/sec
+	 * so it takes 2.912 us to travel 1 mm, i.e. 5.844 us for a
 	 * roundtrip of 1 mm.
 	 */
 	d_mm = (t_us * 1000) / 5844;
