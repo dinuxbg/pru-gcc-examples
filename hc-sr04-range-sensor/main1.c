@@ -123,13 +123,21 @@ int main(void)
 	struct pru_rpmsg_transport transport;
 	volatile uint8_t *status;
 
+#if defined(__AM335X__)
 	/* AM335x must enable OCP master port access in order for the PRU to
 	 * read external memories.
 	 */
 	CT_CFG.SYSCFG_bit.STANDBY_INIT = 0;
+#endif
 
 	/* Clear the status of the PRU-ICSS system event that the ARM will use to 'kick' us */
+#if defined(__AM335X__)
 	CT_INTC.SICR_bit.STS_CLR_IDX = FROM_ARM_HOST;
+#elif defined(__TDA4VM__)
+	CT_INTC.STATUS_CLR_INDEX_REG_bit.STATUS_CLR_INDEX = FROM_ARM_HOST;
+#else
+  #error "Unsupported SoC."
+#endif
 
 	/* Make sure the Linux drivers are ready for RPMsg communication */
 	status = &resourceTable.rpmsg_vdev.status;
@@ -147,7 +155,11 @@ int main(void)
 		/* Check bit 31 of register R31 to see if the ARM has kicked us */
 		if (__R31 & HOST_INT) {
 			/* Clear the event status */
+#if defined(__AM335X__)
 			CT_INTC.SICR_bit.STS_CLR_IDX = FROM_ARM_HOST;
+#elif defined(__TDA4VM__)
+			CT_INTC.STATUS_CLR_INDEX_REG_bit.STATUS_CLR_INDEX = FROM_ARM_HOST;
+#endif
 			handle_mailbox_interrupt(&transport);
 		}
 	}

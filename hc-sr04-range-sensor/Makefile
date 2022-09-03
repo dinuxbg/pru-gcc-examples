@@ -43,8 +43,11 @@ CFLAGS += -minrt
 
 # Per-PRU core flags. The -mmcu option will select the correct linker
 # script and will predefine mcu-specific macros.
-CFLAGS0 += -mmcu=am335x.pru0
-CFLAGS1 += -mmcu=am335x.pru1
+TISOC?=am335x
+#TISOC=tda4vm.icssg0
+
+CFLAGS0 += -mmcu=$(TISOC).pru0
+CFLAGS1 += -mmcu=$(TISOC).pru1
 
 # List of source files to compile for each PRU core.
 SRC0 := main0.c

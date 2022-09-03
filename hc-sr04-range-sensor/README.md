@@ -6,10 +6,23 @@ To understand the rpmsg code here please visit http://processors.wiki.ti.com/ind
 
 :warning: **WARNING**: This version requires remoteproc driver from Linux kernel version 5.10 or later, as well as RPMSG driver for PRU. For earlier kernels, please check the other branches of this project.
 
-## Wiring the sensor
+## 1. Build and install
+First step is to build the firmware and install it. Export the `TISOC` variable with the SoC variant for your board.
+
+	export TISOC=am335x          # For BeagleBone "classics"
+	export TISOC=tda4vm.icssg0   # For Beaglebone-AI64
+
+	cd hc-sr04-range-sensor
+	make
+	sudo bash
+	cp out/pru-halt.elf /lib/firmware/
+	cp out/hc-sr04-range-sensor.elf /lib/firmware/
+
+## 2. Setup on Beaglebone Black/Green/White
+### 2.1. Wiring the sensor
 There is a good explanation in https://github.com/HudsonWerks/Range-Sensor-PRU, so I'll just quote it:
 
-> Hardware configuration:
+> Hardware configuration
 > 
 >         * TRIGGER               P8_12 gpio1[12] GPIO44  out     pulldown                Mode: 7 
 >         * ECHO                  P8_11 gpio1[13] GPIO45  in      pulldown                Mode: 7 *** with R 1KOhm
@@ -22,20 +35,35 @@ There is a good explanation in https://github.com/HudsonWerks/Range-Sensor-PRU, 
 > 
 > NOTE: The resistors are important. Since the sensor emits a 5V signal, and the Beaglebone Black's input pins are only 3.3V, using resistors or voltage converters is crucial for preventing damage to your board.
 
-## Building and running the example
-
-Build and install firmware:
-
-	cd hc-sr04-range-sensor
-	make
-	sudo bash
-	cp out/pru-halt.elf /lib/firmware/
-	cp out/hc-sr04-range-sensor.elf /lib/firmware/
+### 2.2. Starting the firmware
 
 	echo pru-halt.elf > /sys/class/remoteproc/remoteproc1/firmware
 	echo hc-sr04-range-sensor.elf > /sys/class/remoteproc/remoteproc2/firmware
 	echo start > /sys/class/remoteproc/remoteproc1/state
 	echo start > /sys/class/remoteproc/remoteproc2/state
+
+## 3. Setup on BeagleBone-AI64
+
+Wire as follows:
+
+	* TRIGGER               P9_13   gpio0_2
+	* ECHO                  P9_11   gpio0_1     **** with R 1KOhm!!!
+	* GND                   P9_1 or P9_2      GND
+	* VCC                   P9_7 or P9_8      VDD_5V
+
+Pin mux for those pins should already default to GPIO mode if you are running the BeagleBoard Debian images.
+
+Find the PRU1 instance for remoteproc. It was `remoteproc3` for me, but it might be different for you:
+
+	cat /sys/class/remoteproc/remoteproc3/name
+	-> b038000.pru
+
+Start the HC-SR04 firmware:
+
+	echo hc-sr04-range-sensor.elf > /sys/class/remoteproc/remoteproc3/firmware
+	echo start > /sys/class/remoteproc/remoteproc3/state
+
+## 4. Triggering a measurement
 
 To see the range measurement result in millimeters:
 
