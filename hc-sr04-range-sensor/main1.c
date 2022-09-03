@@ -38,8 +38,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pru_cfg.h>
-#include <pru_intc.h>
 #include <rsc_types.h>
 #include <pru_virtqueue.h>
 #include <pru_rpmsg.h>
@@ -49,6 +47,10 @@
 #include <pru/io.h>
 
 #include "hc-sr04.h"
+
+#ifndef CT_INTC
+  #error "Please upgrade to gnuprumcu v0.9.0 or later, in order to get CT_INTC defines."
+#endif
 
 /* Host-1 Interrupt sets bit 31 in register R31 */
 #define HOST_INT			((uint32_t) 1 << 31)

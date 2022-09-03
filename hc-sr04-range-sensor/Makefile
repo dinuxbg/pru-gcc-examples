@@ -35,7 +35,7 @@ CFLAGS += -g -Os
 CFLAGS += -Wall -Wextra
 
 # Headers needed by the TI rpmsg library.
-CFLAGS += -I./include -I./include/am335x
+CFLAGS += -I./include
 
 # Define this to squeeze code size by removing atexit, exit, constructors
 # and destructors from CRT.
