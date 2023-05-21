@@ -60,6 +60,19 @@
 
   #define TRIG_BIT		2
   #define ECHO_BIT		1
+
+#elif defined(__AM62X__)
+  #define GPIOx_BASE		0x601000	/* GPIO1 */
+
+  /* SPRUIV7A, 12.2.5.1 GPIO Registers. */
+  #define GPIOx_OE		(*(volatile uint32_t *)(GPIOx_BASE + 0x010))	/* DIR01 */
+  #define GPIOx_DATAIN		(*(volatile uint32_t *)(GPIOx_BASE + 0x020))
+  #define GPIOx_CLEARDATAOUT	(*(volatile uint32_t *)(GPIOx_BASE + 0x01c))
+  #define GPIOx_SETDATAOUT	(*(volatile uint32_t *)(GPIOx_BASE + 0x018))
+
+  #define TRIG_BIT		12
+  #define ECHO_BIT		9
+
 #endif
 
 void hc_sr04_init(void)

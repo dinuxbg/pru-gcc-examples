@@ -31,7 +31,7 @@
 
 # Common flags
 CROSS_COMPILE ?= pru-
-CFLAGS += -g -Os
+CFLAGS += -Oz
 CFLAGS += -Wall -Wextra
 
 # Headers needed by the TI rpmsg library.

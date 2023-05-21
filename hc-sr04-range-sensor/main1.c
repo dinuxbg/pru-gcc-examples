@@ -133,7 +133,7 @@ int main(void)
 	/* Clear the status of the PRU-ICSS system event that the ARM will use to 'kick' us */
 #if defined(__AM335X__)
 	CT_INTC.SICR_bit.STS_CLR_IDX = FROM_ARM_HOST;
-#elif defined(__TDA4VM__)
+#elif defined(__TDA4VM__) || defined(__AM62X__)
 	CT_INTC.STATUS_CLR_INDEX_REG_bit.STATUS_CLR_INDEX = FROM_ARM_HOST;
 #else
   #error "Unsupported SoC."
@@ -157,7 +157,7 @@ int main(void)
 			/* Clear the event status */
 #if defined(__AM335X__)
 			CT_INTC.SICR_bit.STS_CLR_IDX = FROM_ARM_HOST;
-#elif defined(__TDA4VM__)
+#elif defined(__TDA4VM__) || defined(__AM62X__)
 			CT_INTC.STATUS_CLR_INDEX_REG_bit.STATUS_CLR_INDEX = FROM_ARM_HOST;
 #endif
 			handle_mailbox_interrupt(&transport);
