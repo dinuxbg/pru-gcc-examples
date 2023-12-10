@@ -82,22 +82,11 @@
 
 uint8_t payload[RPMSG_MESSAGE_SIZE];
 
+extern int test_carry(void);
 static int measure_distance_mm(void)
 {
-	int t_us = hc_sr04_measure_pulse();
-	int d_mm;
-
-	/*
-	 * Print the distance received from the sonar
-	 * At 20 degrees in dry air the speed of sound is 342 m/sec
-	 * so it takes 2.912 us to travel 1 mm, i.e. 5.844 us for a
-	 * roundtrip of 1 mm.
-	 */
-	d_mm = (t_us * 1000) / 5844;
-	if (t_us < 0)
-		d_mm = -1;
-
-	return d_mm;
+	int res = test_carry();
+	return res;
 }
 
 static void handle_mailbox_interrupt(struct pru_rpmsg_transport *transport)

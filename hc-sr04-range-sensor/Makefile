@@ -51,7 +51,7 @@ CFLAGS1 += -mmcu=$(TISOC).pru1
 
 # List of source files to compile for each PRU core.
 SRC0 := main0.c
-SRC1 := main1.c hc-sr04.c pru_rpmsg.c pru_virtqueue.c
+SRC1 := main1.c hc-sr04.c pru_rpmsg.c pru_virtqueue.c carry.s
 
 # GCC's -MMD does not yield the needed C dependencies when compiling all
 # C source files at once. So manually list headers here.
