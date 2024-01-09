@@ -71,7 +71,6 @@
 //#define CHAN_NAME			"rpmsg-client-sample"
 #define CHAN_NAME			"rpmsg-pru"
 
-#define CHAN_DESC			"Channel 31"
 #define CHAN_PORT			31
 
 /*
@@ -147,7 +146,7 @@ int main(void)
 	pru_rpmsg_init(&transport, &resourceTable.rpmsg_vring0, &resourceTable.rpmsg_vring1, TO_ARM_HOST, FROM_ARM_HOST);
 
 	/* Create the RPMsg channel between the PRU and ARM user space using the transport structure. */
-	while (pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, CHAN_NAME, CHAN_DESC, CHAN_PORT) != PRU_RPMSG_SUCCESS);
+	while (pru_rpmsg_channel(RPMSG_NS_CREATE, &transport, CHAN_NAME, CHAN_PORT) != PRU_RPMSG_SUCCESS);
 
 	hc_sr04_init();
 
