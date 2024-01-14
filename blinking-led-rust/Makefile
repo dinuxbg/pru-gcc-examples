@@ -1,0 +1,93 @@
+# Copyright (c) 2024, Dimitar Dimitrov
+#   All rights reserved.
+#
+#   Redistribution and use in source and binary forms, with or without
+#   modification, are permitted provided that the following conditions are met:
+#
+#   * Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#   * Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in
+#     the documentation and/or other materials provided with the
+#     distribution.
+#   * Neither the name of the copyright holders nor the names of
+#     contributors may be used to endorse or promote products derived
+#     from this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+
+# Very simple makefile to cross-compile for PRU
+
+
+# Common flags
+CROSS_COMPILE ?= pru-
+CFLAGS += -Oz
+CFLAGS += -Wall -Wextra
+
+# Define this to squeeze code size by removing atexit, exit, constructors
+# and destructors from CRT.
+CFLAGS += -minrt
+
+# Per-PRU core flags. The -mmcu option will select the correct linker
+# script and will predefine mcu-specific macros.
+TISOC?=am335x
+
+CFLAGS0 += -mmcu=$(TISOC).pru0
+CFLAGS1 += -mmcu=$(TISOC).pru1
+
+# List of source files to compile for each PRU core.
+SRC0 := main0.rs
+SRC1 := main1.rs
+
+# Where to output compiled objects
+OUT := out
+
+# Final ELF image file names
+ELF0 := $(OUT)/firmware0.elf
+ELF1 := $(OUT)/firmware1.elf
+
+# ============================ DO NOT TOUCH BELOW ============================
+all: $(ELF0) $(ELF1)
+	@echo Success: $^
+
+%.s : %.elf
+	$(CROSS_COMPILE)objdump -S -d $< > $@
+
+# Binary images for IMEM and DMEM memories. Might be useful
+# for firmware loaders that cannot handle ELF.
+%.imem.bin : %.elf
+	$(CROSS_COMPILE)objcopy -O binary  --only-section=.text* $< $@
+
+%.dmem.bin : %.elf
+	$(CROSS_COMPILE)objcopy -O binary              \
+	  --only-section=.data*                        \
+	  --only-section=.bss*                         \
+	  --set-section-flags .bss=alloc,load,contents \
+	  $< $@
+
+$(OUT):
+	mkdir $(OUT)
+
+$(ELF0): $(SRC0) | $(OUT)
+	$(CROSS_COMPILE)gccrs $(CFLAGS) $(CFLAGS0) $(SRC0) $(LDFLAGS) -o $@
+
+$(ELF1): $(SRC1) | $(OUT)
+	$(CROSS_COMPILE)gccrs $(CFLAGS) $(CFLAGS1) $(SRC1) $(LDFLAGS) -o $@
+
+clean:
+	$(RM) -fr $(ELF0) $(ELF1) $(OUT) *.rox
+
+cscope:
+	cscope -bRk
+
+.PHONY: all clean cscope
