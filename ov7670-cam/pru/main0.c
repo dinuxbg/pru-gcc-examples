@@ -38,7 +38,7 @@ void *video_memory;
 int main(void)
 {
 	if (!video_memory)
-		return EXIT_FAILURE;
+		for (;;) ;
 
 	/* Hardcode VGA for the time being.
 	 *

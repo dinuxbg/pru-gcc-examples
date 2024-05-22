@@ -30,6 +30,7 @@
 
 int main(void)
 {
-	__halt();
-	return 0;
+	for (;;) {
+		__halt();
+	}
 }
