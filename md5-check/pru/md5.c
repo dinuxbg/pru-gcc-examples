@@ -37,28 +37,7 @@
  
 #ifndef HAVE_OPENSSL
  
-#if defined(__PRU__)
-typedef long size_t;
-void *memset(void *dst, int c, size_t sz)
-{
-	unsigned char *pdst = dst;
-	while (sz--)
-		*pdst++ = c;
-
-	return dst;
-}
-void *memcpy(void *dst, const void *src, size_t sz)
-{
-	unsigned char *pdst = dst;
-	const unsigned char *psrc = src;
-	while (sz--)
-		*pdst++ = *psrc++;
-
-	return dst;
-}
-#else
 #include <string.h>
-#endif
  
 #include "md5.h"
  
