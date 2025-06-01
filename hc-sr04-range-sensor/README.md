@@ -90,12 +90,12 @@ Start the HC-SR04 firmware:
 To see the range measurement result in millimeters:
 
 	sudo bash
-	echo hello > /dev/rpmsg_pru31
-	cat /dev/rpmsg_pru31   # Press Ctrl+C to exit
+	echo hello > /dev/rpmsg0
+	cat /dev/rpmsg0   # Press Ctrl+C to exit
 
 Or, alternatively, as a one-liner in BASH:
 
-	echo s >/dev/rpmsg_pru31; dd if=/dev/rpmsg_pru31 bs=32 count=1 2>/dev/null; echo
+	echo s >/dev/rpmsg0; dd if=/dev/rpmsg0 bs=32 count=1 2>/dev/null; echo
 
 ## Acknowledgements
  * Sensor idea and DTS from https://github.com/HudsonWerks/Range-Sensor-PRU

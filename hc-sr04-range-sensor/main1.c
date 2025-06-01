@@ -65,11 +65,11 @@
  * Using the name 'rpmsg-client-sample' will probe the RPMsg sample driver
  * found at linux-x.y.z/samples/rpmsg/rpmsg_client_sample.c
  *
- * Using the name 'rpmsg-pru' will probe the rpmsg_pru driver found
- * at linux-x.y.z/drivers/rpmsg/rpmsg_pru.c
+ * Using the name 'rpmsg-raw' will probe the rpmsg_pru driver found
+ * at linux-x.y.z/drivers/rpmsg/rpmsg_char.c
  */
 //#define CHAN_NAME			"rpmsg-client-sample"
-#define CHAN_NAME			"rpmsg-pru"
+#define CHAN_NAME			"rpmsg-raw"
 
 #define CHAN_PORT			31
 
