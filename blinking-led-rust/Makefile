@@ -47,7 +47,7 @@ CFLAGS1 += -mmcu=$(TISOC).pru1
 
 # List of source files to compile for each PRU core.
 SRC0 := main0.rs
-SRC1 := main1.rs
+SRC1 := main1.rs delay.c
 
 # Where to output compiled objects
 OUT := out
