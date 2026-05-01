@@ -9,6 +9,12 @@ error:
 # usually packaged, and it's mainly for internal use anyway.
 check-build:
 	make -C blinking-led/pru/
+	make -C blinking-led/pru/ clean
+	make -C blinking-led/pru/ TISOC=am18xx
+	make -C blinking-led/pru/ clean
+	make -C blinking-led/pru/ TISOC=am62x
+	make -C blinking-led/pru/ clean
+	make -C blinking-led/pru/ TISOC=am62x
 	make -C blinking-led++/
 	make -C button-blinking-led/pru/
 	make -C hc-sr04-range-sensor/ clean

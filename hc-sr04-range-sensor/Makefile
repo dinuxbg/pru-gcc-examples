@@ -43,6 +43,7 @@ CFLAGS += -minrt
 
 # Per-PRU core flags. The -mmcu option will select the correct linker
 # script and will predefine mcu-specific macros.
+# See https://github.com/dinuxbg/gnuprumcu/blob/master/MCU-LIST.md
 TISOC?=am335x
 #TISOC=tda4vm.icssg0
 

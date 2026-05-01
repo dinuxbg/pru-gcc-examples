@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Dimitar Dimitrov
+# Copyright (c) 2026, Dimitar Dimitrov
 #   All rights reserved.
 #
 #   Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 
 # Common flags
 CROSS_COMPILE ?= pru-
-CFLAGS += -g -Os
+CFLAGS += -Oz
 CFLAGS += -Wall -Wextra
 
 # Add remoteproc headers
@@ -43,8 +43,13 @@ CFLAGS += -minrt
 
 # Per-PRU core flags. The -mmcu option will select the correct linker
 # script and will predefine mcu-specific macros.
-CFLAGS0 += -mmcu=am335x.pru0
-CFLAGS1 += -mmcu=am335x.pru1 -nostdlib -nodefaultlibs -nostartfiles
+# See https://github.com/dinuxbg/gnuprumcu/blob/master/MCU-LIST.md
+TISOC?=am335x
+
+CFLAGS0 += -mmcu=$(TISOC).pru0
+CFLAGS1 += -mmcu=$(TISOC).pru1
+
+CFLAGS1 += -nostdlib -nodefaultlibs -nostartfiles
 
 # List of source files to compile for each PRU core.
 SRC0 := main0.c
